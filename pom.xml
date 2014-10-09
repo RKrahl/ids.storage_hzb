@@ -11,36 +11,13 @@
         <repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
     </properties>
 
-    <distributionManagement>
-        <downloadUrl>http://www.icatproject.org/mvn/repo</downloadUrl>
-        <site>
-            <id>website</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/site/ids/storage_file/${project.version}</url>
-        </site>
-        <repository>
-            <id>repo</id>
-            <url>scp://www.icatproject.org/var/www/html/mvn/repo</url>
-        </repository>
-    </distributionManagement>
-
     <description>File plugin for ICAT Data Service.</description>
-    <issueManagement>
-        <url>http://code.google.com/p/icat-data-service/issues/list</url>
-        <system>Google Code</system>
-    </issueManagement>
 
     <scm>
         <connection>scm:svn:http://icat-data-service.googlecode.com/svn/storage_file/tags/ids.storage_file-1.2.0</connection>
         <developerConnection>scm:svn:https://icat-data-service.googlecode.com/svn/storage_file/tags/ids.storage_file-1.2.0</developerConnection>
         <url>http://code.google.com/p/icat-data-service/source/browse/#svn%2Fstorage_file%2Ftrunk/tags/ids.storage_file-1.2.0</url>
     </scm>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
 
     <organization>
         <name>The ICAT Collaboration</name>
@@ -128,62 +105,9 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.1</version>
-                <dependencies>
-                    <dependency><!-- add support for ssh/scp -->
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-ssh</artifactId>
-                        <version>1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
-                <dependencies>
-                    <dependency><!-- add support for ssh/scp -->
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-ssh</artifactId>
-                        <version>1.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
         </plugins>
 
     </build>
-
-    <reporting>
-
-        <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>index</report>
-                            <report>summary</report>
-                            <report>dependencies</report>
-                            <report>issue-tracking</report>
-                            <report>license</report>
-                            <report>plugins</report>
-                            <report>scm</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-
-        </plugins>
-
-    </reporting>
 
 </project>
 
