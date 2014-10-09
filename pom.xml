@@ -1,27 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.icatproject</groupId>
-    <artifactId>ids.storage_file</artifactId>
-    <version>1.2.0</version>
-    <name>IDS storage_file</name>
+    <groupId>de.helmholtz_berlin.icat</groupId>
+    <artifactId>ids.storage_hzb</artifactId>
+    <version>0.1.0</version>
+    <name>IDS storage_hzb</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <repoUrl>http://www.icatproject.org/mvn/repo</repoUrl>
     </properties>
 
-    <description>File plugin for ICAT Data Service.</description>
+    <description>HZB storage plugin for ICAT Data Service.</description>
 
     <scm>
-        <connection>scm:svn:http://icat-data-service.googlecode.com/svn/storage_file/tags/ids.storage_file-1.2.0</connection>
-        <developerConnection>scm:svn:https://icat-data-service.googlecode.com/svn/storage_file/tags/ids.storage_file-1.2.0</developerConnection>
-        <url>http://code.google.com/p/icat-data-service/source/browse/#svn%2Fstorage_file%2Ftrunk/tags/ids.storage_file-1.2.0</url>
+        <connection>scm:svn:http://manti.exp.bessy.de/svn/icat/ids-plugin-hzb</connection>
+        <developerConnection>scm:svn:http://manti.exp.bessy.de/svn/icat/ids-plugin-hzb</developerConnection>
     </scm>
 
     <organization>
-        <name>The ICAT Collaboration</name>
-        <url>http://www.icatproject.org</url>
+        <name>Helmholtz-Zentrum Berlin f&#252;r Materialien und Energie</name>
+        <url>http://www.helmholtz-berlin.de/</url>
     </organization>
 
     <repositories>
@@ -70,7 +68,7 @@
                 <configuration>
                     <artifactSet>
                         <includes>
-                            <include>org.icatproject:ids.storage</include>
+                            <include>de.helmholtz_berlin.icat:ids.storage</include>
                             <include>org.icatproject:ids.plugin</include>
                             <include>org.icatproject:icat.utils</include>
                         </includes>

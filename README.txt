@@ -1,8 +1,16 @@
-ids.storage_file: File Storage plugin for ICAT Data Service
-------------------------------------------------------------
+      ids.storage_hzb: HZB storage plugin for ICAT Data Service
+      ---------------------------------------------------------
 
-General installation instructions are at http://icatproject.org/installation/component
+ids.storage_hzb is based on ids.storage_file 1.2.0.  The original
+install instraction for ids.storage_file below should mostly apply to
+ids.storage_hzb as well.
 
-Specific installation instructions are at http://icatproject.org/mvn/site/ids/storage_file/${project.version}/installation.html
 
-All documentation on ids.storage_file may be found at http://icatproject.org/mvn/site/ids/storage_file/${project.version}
+General installation instructions are at
+http://icatproject.org/installation/component
+
+Specific installation instructions are at
+http://icatproject.org/mvn/site/ids/storage_file/${project.version}/installation.html
+
+All documentation on ids.storage_file may be found at
+http://icatproject.org/mvn/site/ids/storage_file/${project.version}

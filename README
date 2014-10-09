@@ -1,5 +1,5 @@
-	     ids.hzb - An IDS storage plugin for the HZB
-	     -------------------------------------------
+	 ids.storage_hzb - An IDS storage plugin for the HZB
+	 ---------------------------------------------------
 
 This directory conatins an IDS storage plugin adapted to the needs of
 HZB.  At the current stage, it is highly experimental, basically a

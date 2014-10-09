@@ -1,4 +1,4 @@
-package org.icatproject.ids.storage;
+package de.helmholtz_berlin.icat.ids.storage;
 
 import java.io.File;
 import java.io.IOException;

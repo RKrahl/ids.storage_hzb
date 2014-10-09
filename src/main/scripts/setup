@@ -2,14 +2,14 @@
 from setup_utils import *
 import os
 
-# ids.storage_file
+# ids.storage_hzb
 
 actions, options, arg = getActions()
-props = actions.getGlassfish("ids.storage_file-setup.properties", ["glassfish", "port"])
+props = actions.getGlassfish("ids.storage_hzb-setup.properties", ["glassfish", "port"])
 
 prop_lists = {}
-prop_lists["ids.storage_file.main.properties"] = ["dir"]
-prop_lists["ids.storage_file.archive.properties"] = ["dir"]
+prop_lists["ids.storage_hzb.main.properties"] = ["dir"]
+prop_lists["ids.storage_hzb.archive.properties"] = ["dir"]
 
 
 if arg in ["CONFIGURE", "INSTALL"]:
@@ -31,8 +31,8 @@ if arg == "INSTALL":
     try:     
         app = actions.getAppName("ids.server")
         if app: actions.asadmin("disable " + app)   
-        actions.removeFromApplibs("ids.storage_file*.jar")    
-        actions.installToApplibs("ids.storage_file*.jar")
+        actions.removeFromApplibs("ids.storage_hzb*.jar")    
+        actions.installToApplibs("ids.storage_hzb*.jar")
         actions.stopDomain()
         actions.startDomain()
         if app: actions.asadmin("enable " + app) 
@@ -45,7 +45,7 @@ if arg == "UNINSTALL":
         actions.removeFile(prop_name)
     
     try:
-        actions.removeFromApplibs("ids.storage_file*.jar")        
+        actions.removeFromApplibs("ids.storage_hzb*.jar")        
     except Exception, e:
         abort(str(e))       
     

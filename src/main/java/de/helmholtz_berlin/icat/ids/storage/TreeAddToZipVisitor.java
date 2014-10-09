@@ -1,4 +1,4 @@
-package org.icatproject.ids.storage;
+package de.helmholtz_berlin.icat.ids.storage;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;

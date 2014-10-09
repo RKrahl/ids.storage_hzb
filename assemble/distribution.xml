@@ -8,18 +8,18 @@
 
     <fileSets>
         <fileSet>
-            <outputDirectory>ids.storage_file</outputDirectory>
+            <outputDirectory>ids.storage_hzb</outputDirectory>
             <directory>${basedir}/src/main/scripts</directory>
             <excludes>
                 <exclude>*.dump</exclude>
             </excludes>
         </fileSet>
         <fileSet>
-            <outputDirectory>ids.storage_file</outputDirectory>
+            <outputDirectory>ids.storage_hzb</outputDirectory>
             <directory>${basedir}/src/main/config</directory>
         </fileSet>
         <fileSet>
-            <outputDirectory>ids.storage_file</outputDirectory>
+            <outputDirectory>ids.storage_hzb</outputDirectory>
             <directory>${basedir}</directory>
             <filtered>true</filtered>
             <includes>
@@ -31,15 +31,15 @@
 
     <dependencySets>
         <dependencySet>
-            <outputDirectory>ids.storage_file</outputDirectory>
+            <outputDirectory>ids.storage_hzb</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <includes>
-                <include>org.icatproject:ids.storage_file</include>
+                <include>de.helmholtz_berlin.icat:ids.storage_hzb</include>
             </includes>
         </dependencySet>
 
         <dependencySet>
-            <outputDirectory>ids.storage_file</outputDirectory>
+            <outputDirectory>ids.storage_hzb</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>true</unpack>
             <unpackOptions>
