@@ -1,0 +1,14 @@
+	     ids.hzb - An IDS storage plugin for the HZB
+	     -------------------------------------------
+
+This directory conatins an IDS storage plugin adapted to the needs of
+HZB.  At the current stage, it is highly experimental, basically a
+proof of concept to to show how IDS storage plugins can be customized
+in principle.
+
+This source code is based on ids.storage_file 1.2.0.
+
+
+# Local Variables:
+# mode: text
+# End:
