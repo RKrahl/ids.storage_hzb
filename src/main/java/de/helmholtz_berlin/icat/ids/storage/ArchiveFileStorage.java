@@ -35,10 +35,13 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
 		}
 	}
 
+	private String getRelPath(DsInfo dsInfo) {
+		return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" + dsInfo.getDsName();
+	}
+
 	@Override
 	public void delete(DsInfo dsInfo) throws IOException {
-		String location = dsInfo.getInvId() + "/" + dsInfo.getDsId();
-		Path path = baseDir.resolve(location);
+		Path path = baseDir.resolve(getRelPath(dsInfo));
 		Files.delete(path);
 		path = path.getParent();
 		try {
@@ -50,15 +53,14 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
 
 	@Override
 	public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
-		String location = dsInfo.getInvId() + "/" + dsInfo.getDsId();
-		Path path = baseDir.resolve(location);
+		Path path = baseDir.resolve(getRelPath(dsInfo));
 		Files.createDirectories(path.getParent());
 		Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	@Override
 	public void get(DsInfo dsInfo, Path path) throws IOException {
-		String location = dsInfo.getInvId() + "/" + dsInfo.getDsId();
+		String location = getRelPath(dsInfo);
 		Files.copy(baseDir.resolve(location), path, StandardCopyOption.REPLACE_EXISTING);
 	}
 
