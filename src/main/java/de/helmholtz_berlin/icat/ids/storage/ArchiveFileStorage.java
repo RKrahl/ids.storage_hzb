@@ -36,7 +36,7 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
 	}
 
 	private String getRelPath(DsInfo dsInfo) {
-		return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" + dsInfo.getDsName();
+		return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" + dsInfo.getDsName() + ".zip";
 	}
 
 	@Override
