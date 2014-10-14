@@ -31,7 +31,7 @@ public class ArchiveFileStorage extends FileStorage
     }
 
     @Override
-    protected String getRelPath(DsInfo dsInfo) {
+    protected String getRelPath(DsInfo dsInfo) throws IOException {
 	return super.getRelPath(dsInfo) + ".zip";
     }
 
