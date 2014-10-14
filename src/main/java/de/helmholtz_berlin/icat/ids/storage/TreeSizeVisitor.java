@@ -9,37 +9,37 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 
-	private long size;
+    private long size;
 
-	@Override
-	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-
-		try {
-			size += Files.size(file);
-		} catch (IOException e) {
-			// Ignore it
-		}
-		return FileVisitResult.CONTINUE;
-
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) 
+	throws IOException {
+	try {
+	    size += Files.size(file);
+	} catch (IOException e) {
+	    // Ignore it
 	}
+	return FileVisitResult.CONTINUE;
+    }
 
-	@Override
-	public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
-		if (e == null) {
-			try {
-				size += Files.size(dir);
-			} catch (IOException e1) {
-				// Ignore it
-			}
-			return FileVisitResult.CONTINUE;
-		} else {
-			// directory iteration failed
-			throw e;
-		}
+    @Override
+    public FileVisitResult postVisitDirectory(Path dir, IOException e) 
+	throws IOException {
+	if (e == null) {
+	    try {
+		size += Files.size(dir);
+	    } catch (IOException e1) {
+		// Ignore it
+	    }
+	    return FileVisitResult.CONTINUE;
+	} else {
+	    // directory iteration failed
+	    throw e;
 	}
+    }
 
-	public long getSize() {
-		return size;
-	}
+    public long getSize() {
+	return size;
+    }
 
 }
