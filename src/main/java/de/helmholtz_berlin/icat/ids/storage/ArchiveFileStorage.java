@@ -39,12 +39,7 @@ public class ArchiveFileStorage extends FileStorage
     public void delete(DsInfo dsInfo) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	Files.delete(path);
-	path = path.getParent();
-	try {
-	    Files.delete(path);
-	} catch (IOException e) {
-	    // Investigation directory probably not empty
-	}
+	deleteParentDirs(baseDir, path);
     }
 
     @Override

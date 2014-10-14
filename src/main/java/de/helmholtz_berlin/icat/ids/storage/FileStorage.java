@@ -21,4 +21,16 @@ public abstract class FileStorage {
 	    + dsInfo.getDsName();
     }
 
+    protected void deleteParentDirs(Path baseDir, Path path) {
+	path = path.getParent();
+	try {
+	    while (!path.equals(baseDir)) {
+		Files.delete(path);
+		path = path.getParent();
+	    }
+	} catch (IOException e) {
+	    // Directory probably not empty
+	}
+    }
+
 }

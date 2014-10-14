@@ -54,32 +54,14 @@ public class MainFileStorage extends FileStorage
 	if (Files.exists(path)) {
 	    Files.walkFileTree(path, treeDeleteVisitor);
 	}
-	/* Try deleting empty directories */
-	path = path.getParent();
-	try {
-	    while (!path.equals(baseDir)) {
-		Files.delete(path);
-		path = path.getParent();
-	    }
-	} catch (IOException e) {
-	    // Directory probably not empty
-	}
+	deleteParentDirs(baseDir, path);
     }
 
     @Override
     public void delete(String location) throws IOException {
 	Path path = baseDir.resolve(location);
 	Files.delete(path);
-	/* Try deleting empty directories */
-	path = path.getParent();
-	try {
-	    while (!path.equals(baseDir)) {
-		Files.delete(path);
-		path = path.getParent();
-	    }
-	} catch (IOException e) {
-	    // Directory probably not empty
-	}
+	deleteParentDirs(baseDir, path);
     }
 
     @Override
