@@ -51,6 +51,10 @@ public class MainFileStorage implements MainStorageInterface {
 		}
 	}
 
+	private String getRelPath(DsInfo dsInfo) {
+		return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" + dsInfo.getDsName();
+	}
+
 	@Override
 	public void delete(DsInfo dsInfo) throws IOException {
 		Path path = baseDir.resolve(getRelPath(dsInfo));
@@ -99,15 +103,11 @@ public class MainFileStorage implements MainStorageInterface {
 
 	@Override
 	public String put(DsInfo dsInfo, String name, InputStream is) throws IOException {
-		String location = getRelPath(dsInfo) + "/" + UUID.randomUUID();
+		String location = getRelPath(dsInfo) + "/" + name;
 		Path path = baseDir.resolve(location);
 		Files.createDirectories(path.getParent());
 		Files.copy(new BufferedInputStream(is), path);
 		return location;
-	}
-
-	private String getRelPath(DsInfo dsInfo) {
-		return dsInfo.getInvId() + "/" + dsInfo.getDsId();
 	}
 
 	@Override
@@ -119,6 +119,7 @@ public class MainFileStorage implements MainStorageInterface {
 
 	@Override
 	public List<Long> getInvestigations() throws IOException {
+		// FIXME: this code assumes the sub directory names in baseDir to be investigation ids, which is not the case!
 		List<File> files = Arrays.asList(baseDir.toFile().listFiles());
 		Collections.sort(files, dateComparator);
 		List<Long> results = new ArrayList<>(files.size());
@@ -130,6 +131,7 @@ public class MainFileStorage implements MainStorageInterface {
 
 	@Override
 	public List<Long> getDatasets(long invId) throws IOException {
+		// FIXME: this code assumes the sub directory names in baseDir to be investigation ids, which is not the case!
 		List<File> files = Arrays
 				.asList(baseDir.resolve(Long.toString(invId)).toFile().listFiles());
 		Collections.sort(files, dateComparator);
