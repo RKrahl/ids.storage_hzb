@@ -12,7 +12,10 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 
-public class ArchiveFileStorage implements ArchiveStorageInterface {
+import de.helmholtz_berlin.icat.ids.storage.FileStorage;
+
+public class ArchiveFileStorage extends FileStorage 
+    implements ArchiveStorageInterface {
 
     Path baseDir;
 
@@ -27,16 +30,9 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
 	}
     }
 
-    private void checkDir(Path dir, File props) throws IOException {
-	if (!Files.isDirectory(dir)) {
-	    throw new IOException(dir + " as specified in " + props 
-				  + " is not a directory");
-	}
-    }
-
-    private String getRelPath(DsInfo dsInfo) {
-	return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" 
-	    + dsInfo.getDsName() + ".zip";
+    @Override
+    protected String getRelPath(DsInfo dsInfo) {
+	return super.getRelPath(dsInfo) + ".zip";
     }
 
     @Override

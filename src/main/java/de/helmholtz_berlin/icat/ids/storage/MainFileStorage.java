@@ -18,7 +18,10 @@ import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 
-public class MainFileStorage implements MainStorageInterface {
+import de.helmholtz_berlin.icat.ids.storage.FileStorage;
+
+public class MainFileStorage extends FileStorage 
+    implements MainStorageInterface {
 
     Path baseDir;
 
@@ -42,18 +45,6 @@ public class MainFileStorage implements MainStorageInterface {
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
-    }
-
-    private void checkDir(Path dir, File props) throws IOException {
-	if (!Files.isDirectory(dir)) {
-	    throw new IOException(dir + " as specified in " + props 
-				  + " is not a directory");
-	}
-    }
-
-    private String getRelPath(DsInfo dsInfo) {
-	return dsInfo.getInvName() + "/" + dsInfo.getVisitId() + "/" 
-	    + dsInfo.getDsName();
     }
 
     @Override
