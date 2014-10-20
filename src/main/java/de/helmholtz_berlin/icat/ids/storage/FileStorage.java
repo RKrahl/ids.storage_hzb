@@ -15,6 +15,8 @@ public abstract class FileStorage {
 	= Pattern.compile("(\\d{3})\\d{5}-[A-Z]+(?:_[A-Z]+)?");
     public static final Pattern visitIdRegExp 
 	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:_[A-Z]+)?");
+    public static final Pattern nameRegExp 
+	= Pattern.compile("[0-9A-Za-z~._+-]+");
 
     protected void checkDir(Path dir, File props) throws IOException {
 	if (!Files.isDirectory(dir)) {
@@ -23,19 +25,33 @@ public abstract class FileStorage {
 	}
     }
 
-    protected String getRelPath(DsInfo dsInfo) throws IOException {
-	String invName = dsInfo.getInvName();
-	String visitId = dsInfo.getVisitId();
-	String dsName = dsInfo.getDsName();
-	Matcher inm = invNameRegExp.matcher(invName.replace('/', '_'));
-	Matcher vim = visitIdRegExp.matcher(visitId.replace('/', '_'));
-	if (!inm.matches()) {
+    protected String checkInvName(String invName) throws IOException {
+	Matcher m = invNameRegExp.matcher(invName);
+	if (!m.matches()) {
 	    throw new IOException("invalid invesigation name " + invName);
 	}
-	if (!vim.matches()) {
+	return m.group(1);
+    }
+
+    protected void checkVisitId(String visitId) throws IOException {
+	if (!visitIdRegExp.matcher(visitId).matches()) {
 	    throw new IOException("invalid visit id " + visitId);
 	}
-	String cycle = inm.group(1);
+    }
+
+    protected void checkName(String name) throws IOException {
+	if (!nameRegExp.matcher(name).matches()) {
+	    throw new IOException("invalid name " + name);
+	}
+    }
+
+    protected String getRelPath(DsInfo dsInfo) throws IOException {
+	String invName = dsInfo.getInvName().replace('/', '_');
+	String visitId = dsInfo.getVisitId().replace('/', '_');
+	String dsName = dsInfo.getDsName();
+	String cycle = checkInvName(invName);
+	checkVisitId(visitId);
+	checkName(dsName);
 	return cycle + "/" + invName + "/" + visitId + "/" + dsName;
     }
 

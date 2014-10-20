@@ -47,6 +47,21 @@ public class MainFileStorage extends FileStorage
 	}
     }
 
+    public Path getPath(String location) throws IOException {
+	Path path = baseDir.resolve(location).normalize();
+	if (!path.getParent().startsWith(baseDir)) {
+	    throw new IOException("invalid directory in location " + location);
+	}
+	checkName(path.getFileName().toString());
+	return path;
+    }
+
+    @Override
+    public Path getPath(String location, String createId, String modId) 
+	throws IOException {
+	return getPath(location);
+    }
+
     @Override
     public void delete(DsInfo dsInfo) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
@@ -59,7 +74,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public void delete(String location) throws IOException {
-	Path path = baseDir.resolve(location);
+	Path path = getPath(location);
 	Files.delete(path);
 	deleteParentDirs(baseDir, path);
     }
@@ -72,12 +87,13 @@ public class MainFileStorage extends FileStorage
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	return Files.newInputStream(baseDir.resolve(location));
+	return Files.newInputStream(getPath(location));
     }
 
     @Override
     public String put(DsInfo dsInfo, String name, InputStream is) 
 	throws IOException {
+	checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	Files.createDirectories(path.getParent());
@@ -87,7 +103,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public void put(InputStream is, String location) throws IOException {
-	Path path = baseDir.resolve(location);
+	Path path = getPath(location);
 	Files.createDirectories(path.getParent());
 	Files.copy(new BufferedInputStream(is), path);
     }
@@ -117,12 +133,6 @@ public class MainFileStorage extends FileStorage
 	    results.add(Long.parseLong(file.getName()));
 	}
 	return results;
-    }
-
-    @Override
-    public Path getPath(String location, String createId, String modId) 
-	throws IOException {
-	return baseDir.resolve(location);
     }
 
     // This implementation is robust and simple but might be too
