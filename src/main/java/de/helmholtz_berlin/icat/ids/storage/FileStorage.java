@@ -12,9 +12,9 @@ import org.icatproject.ids.plugin.DsInfo;
 public abstract class FileStorage {
 
     public static final Pattern invNameRegExp 
-	= Pattern.compile("(\\d{3})\\d{5}-[A-Z]+(?:_[A-Z]+)?");
+	= Pattern.compile("(\\d{3})\\d{5}-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern visitIdRegExp 
-	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:_[A-Z]+)?");
+	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z~._+-]+");
 
@@ -46,13 +46,16 @@ public abstract class FileStorage {
     }
 
     protected String getRelPath(DsInfo dsInfo) throws IOException {
-	String invName = dsInfo.getInvName().replace('/', '_');
-	String visitId = dsInfo.getVisitId().replace('/', '_');
+	String invName = dsInfo.getInvName();
+	String visitId = dsInfo.getVisitId();
 	String dsName = dsInfo.getDsName();
 	String cycle = checkInvName(invName);
 	checkVisitId(visitId);
 	checkName(dsName);
-	return cycle + "/" + invName + "/" + visitId + "/" + dsName;
+	return cycle 
+	    + "/" + invName.replace('/', '_') 
+	    + "/" + visitId.replace('/', '_') 
+	    + "/" + dsName;
     }
 
     protected void deleteParentDirs(Path baseDir, Path path) {
