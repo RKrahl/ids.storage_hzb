@@ -1,8 +1,11 @@
 package de.helmholtz_berlin.icat.ids.storage;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -52,8 +55,14 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void get(DsInfo dsInfo, Path path) throws IOException {
 	String location = getRelPath(dsInfo);
-	Files.copy(baseDir.resolve(location), path, 
-		   StandardCopyOption.REPLACE_EXISTING);
+	String inpath = baseDir.resolve(location).toString();
+	try (FileInputStream in = new FileInputStream(inpath)) {
+	    FileChannel inch = in.getChannel();
+	    try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
+		Files.copy(in, path, 
+			   StandardCopyOption.REPLACE_EXISTING);
+	    }
+	}
     }
 
 }
