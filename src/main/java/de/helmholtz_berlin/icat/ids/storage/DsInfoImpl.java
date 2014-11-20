@@ -26,10 +26,10 @@ public class DsInfoImpl implements DsInfo {
      * The relative paths are of the form cycle/invName/visitId/dsName
      */
     public DsInfoImpl(Path relPath) throws IllegalArgumentException {
-	this.facilityName = "HZB";
-	this.invName = relPath.getName(1).toString();
-	this.visitId = relPath.getName(2).toString();
-	this.dsName = relPath.getName(3).toString();
+	this.facilityName = relPath.getName(0).toString();;
+	this.invName = relPath.getName(2).toString();
+	this.visitId = relPath.getName(3).toString();
+	this.dsName = relPath.getName(4).toString();
 	this.size = 0;
 	this.lastModifiedTime = FileTime.fromMillis(0);
     }

@@ -46,13 +46,15 @@ public abstract class FileStorage {
     }
 
     protected String getRelPath(DsInfo dsInfo) throws IOException {
+	String facilityName = dsInfo.getFacilityName();
 	String invName = dsInfo.getInvName();
 	String visitId = dsInfo.getVisitId();
 	String dsName = dsInfo.getDsName();
 	String cycle = checkInvName(invName);
 	checkVisitId(visitId);
 	checkName(dsName);
-	return cycle 
+	checkName(facilityName);
+	return facilityName + "/" + cycle 
 	    + "/" + invName.replace('/', '_') 
 	    + "/" + visitId.replace('/', '_') 
 	    + "/" + dsName;
