@@ -76,7 +76,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public boolean exists(String location) throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (MainFileStorage.exists())");
+	return Files.exists(getPath(location));
     }
 
     @Override
