@@ -9,9 +9,13 @@ import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Set;
 
 import org.icatproject.ids.plugin.ArchiveStorageInterface;
+import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
+import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 
@@ -46,10 +50,21 @@ public class ArchiveFileStorage extends FileStorage
     }
 
     @Override
+    public void delete(String location) throws IOException {
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+    }
+
+    @Override
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	Files.createDirectories(path.getParent());
 	Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @Override
+    public void put(InputStream inputStream, String location) 
+	throws IOException {
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
     }
 
     @Override
@@ -63,6 +78,13 @@ public class ArchiveFileStorage extends FileStorage
 			   StandardCopyOption.REPLACE_EXISTING);
 	    }
 	}
+    }
+
+    @Override
+    public Set<DfInfo> restore(MainStorageInterface mainStorageInterface, 
+			       List<DfInfo> dfInfos)
+	throws IOException {
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
     }
 
 }

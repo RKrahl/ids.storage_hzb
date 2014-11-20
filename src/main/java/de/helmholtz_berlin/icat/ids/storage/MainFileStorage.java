@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
@@ -23,17 +24,6 @@ public class MainFileStorage extends FileStorage
     implements MainStorageInterface {
 
     Path baseDir;
-
-    static Comparator<File> dateComparator = new Comparator<File>() {
-
-	@Override
-	public int compare(File o1, File o2) {
-	    long m1 = o1.lastModified();
-	    long m2 = o2.lastModified();
-	    return (m1 < m2) ? -1 : ((m1 == m2) ? 0 : 1);
-	}
-
-    };
 
     public MainFileStorage(File properties) throws IOException {
 	try {
@@ -72,7 +62,8 @@ public class MainFileStorage extends FileStorage
     }
 
     @Override
-    public void delete(String location) throws IOException {
+    public void delete(String location, String createId, String modId) 
+	throws IOException {
 	Path path = getPath(location);
 	Files.delete(path);
 	deleteParentDirs(baseDir, path);
@@ -81,6 +72,11 @@ public class MainFileStorage extends FileStorage
     @Override
     public boolean exists(DsInfo dsInfo) throws IOException {
 	return Files.exists(baseDir.resolve(getRelPath(dsInfo)));
+    }
+
+    @Override
+    public boolean exists(String location) throws IOException {
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
     }
 
     @Override
@@ -108,40 +104,35 @@ public class MainFileStorage extends FileStorage
     }
 
     @Override
-    public List<Long> getInvestigations() throws IOException {
-	// FIXME: this code assumes the sub directory names in baseDir
-	// to be investigation ids, which is not the case!
-	List<File> files = Arrays.asList(baseDir.toFile().listFiles());
-	Collections.sort(files, dateComparator);
-	List<Long> results = new ArrayList<>(files.size());
-	for (File file : files) {
-	    results.add(Long.parseLong(file.getName()));
-	}
-	return results;
+    public List<DfInfo> getDatafilesToArchive(long lowArchivingLevel, 
+					      long highArchivingLevel)
+	throws IOException {
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
     }
 
     @Override
-    public List<Long> getDatasets(long invId) throws IOException {
-	// FIXME: this code assumes the sub directory names in baseDir
-	// to be investigation ids, which is not the case!
-	File InvDir = baseDir.resolve(Long.toString(invId)).toFile();
-	List<File> files = Arrays.asList(InvDir.listFiles());
-	Collections.sort(files, dateComparator);
-	List<Long> results = new ArrayList<>(files.size());
-	for (File file : files) {
-	    results.add(Long.parseLong(file.getName()));
-	}
-	return results;
-    }
+    public List<DsInfo> getDatasetsToArchive(long lowArchivingLevel, 
+					     long highArchivingLevel)
+	throws IOException {
 
-    // This implementation is robust and simple but might be too
-    // costly if you have a lot of files in main storage. It takes
-    // about a second (on my laptop) to go through 100,000 files.
-    @Override
-    public long getUsedSpace() throws IOException {
-	TreeSizeVisitor visitor = new TreeSizeVisitor();
-	Files.walkFileTree(baseDir, visitor);
-	return visitor.getSize();
+	TreeSizeVisitor treeSizeVisitor = new TreeSizeVisitor(baseDir);
+	Files.walkFileTree(baseDir, treeSizeVisitor);
+
+	long size = treeSizeVisitor.getTotalSize();
+	if (size < highArchivingLevel) {
+	    return Collections.emptyList();
+	}
+	long recover = size - lowArchivingLevel;
+
+	List<DsInfo> result = new ArrayList<>();
+	for (DsInfoImpl dsInfo : treeSizeVisitor.getDsInfos()) {
+	    result.add(dsInfo);
+	    recover -= dsInfo.getSize();
+	    if (recover <= 0) {
+		break;
+	    }
+	}
+	return result;
     }
 
 }

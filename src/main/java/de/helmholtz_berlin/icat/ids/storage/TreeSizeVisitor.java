@@ -6,40 +6,98 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import de.helmholtz_berlin.icat.ids.storage.DsInfoImpl;
 
 public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 
-    private long size;
+    static Comparator<DsInfoImpl> dateComparator = 
+	new Comparator<DsInfoImpl>() {
+	@Override
+	public int compare(DsInfoImpl o1, DsInfoImpl o2) {
+	    FileTime t1 = o1.getLastModifiedTime();
+	    FileTime t2 = o2.getLastModifiedTime();
+	    return t1.compareTo(t2);
+	}
+    };
+
+    private Path baseDir;
+    private Map<Path, DsInfoImpl> dsInfos = new HashMap<>();
+    private long totalSize = 0;
+
+    public TreeSizeVisitor(Path baseDir) {
+	this.baseDir = baseDir;
+    }
+
+    @Override
+    public FileVisitResult 
+	preVisitDirectory(Path dir, BasicFileAttributes attrs)
+	throws IOException {
+
+	Path relPath = baseDir.relativize(dir);
+	int numPathEle = relPath.getNameCount();
+
+	if (numPathEle < 4) {
+
+	    // ignore directory levels above dataset dirs.
+	    return FileVisitResult.CONTINUE;
+
+	} else if (numPathEle == 4) {
+
+	    DsInfoImpl dsInfo = new DsInfoImpl(relPath);
+	    dsInfo.addSize(attrs.size());
+	    dsInfo.updateLastModifiedTime(attrs.lastModifiedTime());
+	    dsInfos.put(relPath, dsInfo);
+	    totalSize += attrs.size();
+	    return FileVisitResult.CONTINUE;
+
+	} else {
+
+	    // there should not be any subdirectories in dataset dirs.
+	    throw new IOException("Invalid directory " + dir.toString());
+
+	}
+
+    }
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) 
 	throws IOException {
-	try {
-	    size += Files.size(file);
-	} catch (IOException e) {
-	    // Ignore it
-	}
-	return FileVisitResult.CONTINUE;
-    }
+	Path relPath = baseDir.relativize(file);
+	int numPathEle = relPath.getNameCount();
 
-    @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException e) 
-	throws IOException {
-	if (e == null) {
-	    try {
-		size += Files.size(dir);
-	    } catch (IOException e1) {
-		// Ignore it
-	    }
+	if (numPathEle <= 4) {
+
+	    // ignore directory levels above dataset dirs.
 	    return FileVisitResult.CONTINUE;
+
 	} else {
-	    // directory iteration failed
-	    throw e;
+
+	    DsInfoImpl dsInfo = dsInfos.get(relPath.getParent());
+	    dsInfo.addSize(attrs.size());
+	    dsInfo.updateLastModifiedTime(attrs.lastModifiedTime());
+	    totalSize += attrs.size();
+	    return FileVisitResult.CONTINUE;
+
 	}
+
     }
 
-    public long getSize() {
-	return size;
+    public long getTotalSize() {
+	return totalSize;
+    }
+
+    public List<DsInfoImpl> getDsInfos() {
+	ArrayList<DsInfoImpl> result = new ArrayList<>(dsInfos.values());
+	Collections.sort(result, dateComparator);
+	return result;
     }
 
 }
