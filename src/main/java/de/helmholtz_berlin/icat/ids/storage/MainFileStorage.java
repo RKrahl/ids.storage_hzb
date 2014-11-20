@@ -76,7 +76,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public boolean exists(String location) throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (MainFileStorage.exists())");
     }
 
     @Override
@@ -107,7 +107,7 @@ public class MainFileStorage extends FileStorage
     public List<DfInfo> getDatafilesToArchive(long lowArchivingLevel, 
 					      long highArchivingLevel)
 	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (MainFileStorage.getDatafilesToArchive())");
     }
 
     @Override

@@ -51,7 +51,7 @@ public class ArchiveFileStorage extends FileStorage
 
     @Override
     public void delete(String location) throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.delete())");
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void put(InputStream inputStream, String location) 
 	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.put())");
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ArchiveFileStorage extends FileStorage
     public Set<DfInfo> restore(MainStorageInterface mainStorageInterface, 
 			       List<DfInfo> dfInfos)
 	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\"");
+	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.restore())");
     }
 
 }
