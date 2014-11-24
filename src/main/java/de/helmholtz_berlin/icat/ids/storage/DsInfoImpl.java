@@ -36,7 +36,11 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getDsId() {
-	return dsId;
+	if (dsId == 0) {
+	    return null;
+	} else {
+	    return dsId;
+	}
     }
 
     @Override
@@ -51,7 +55,11 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getFacilityId() {
-	return facilityId;
+	if (facilityId == 0) {
+	    return null;
+	} else {
+	    return facilityId;
+	}
     }
 
     @Override
@@ -61,7 +69,11 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getInvId() {
-	return invId;
+	if (invId == 0) {
+	    return null;
+	} else {
+	    return invId;
+	}
     }
 
     @Override
