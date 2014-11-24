@@ -7,12 +7,12 @@ import org.icatproject.ids.plugin.DsInfo;
 
 public class DsInfoImpl implements DsInfo {
 
-    private long dsId;
+    private Long dsId;
     private String dsLocation;
     private String dsName;
-    private long facilityId;
+    private Long facilityId;
     private String facilityName;
-    private long invId;
+    private Long invId;
     private String invName;
     private String visitId;
     private long size;
@@ -36,11 +36,7 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getDsId() {
-	if (dsId == 0) {
-	    return null;
-	} else {
-	    return dsId;
-	}
+	return dsId;
     }
 
     @Override
@@ -55,11 +51,7 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getFacilityId() {
-	if (facilityId == 0) {
-	    return null;
-	} else {
-	    return facilityId;
-	}
+	return facilityId;
     }
 
     @Override
@@ -69,11 +61,7 @@ public class DsInfoImpl implements DsInfo {
 
     @Override
     public Long getInvId() {
-	if (invId == 0) {
-	    return null;
-	} else {
-	    return invId;
-	}
+	return invId;
     }
 
     @Override
