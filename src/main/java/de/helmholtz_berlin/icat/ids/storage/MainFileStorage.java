@@ -17,11 +17,16 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class MainFileStorage extends FileStorage 
     implements MainStorageInterface {
+
+    private final static Logger logger 
+	= LoggerFactory.getLogger(MainFileStorage.class);
 
     Path baseDir;
 
@@ -34,6 +39,7 @@ public class MainFileStorage extends FileStorage
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
+	logger.info("MainFileStorage initialized");
     }
 
     public Path getPath(String location) throws IOException {

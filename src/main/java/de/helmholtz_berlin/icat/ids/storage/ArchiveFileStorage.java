@@ -18,11 +18,16 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class ArchiveFileStorage extends FileStorage 
     implements ArchiveStorageInterface {
+
+    private final static Logger logger 
+	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
     Path baseDir;
 
@@ -35,6 +40,7 @@ public class ArchiveFileStorage extends FileStorage
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
+	logger.info("ArchiveFileStorage initialized");
     }
 
     @Override
