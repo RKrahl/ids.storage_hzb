@@ -1,1 +1,2 @@
-dir = /home/fisher/icat/archive/
+# Directory to hold the zipped datafiles for the Archive storage
+dir = /srv/ids/storage_file/archive/

@@ -1,1 +1,2 @@
-dir = /home/fisher/icat/data/
+# Directory to hold the datafiles for the Main storage
+dir = /srv/ids/storage_file/data/
