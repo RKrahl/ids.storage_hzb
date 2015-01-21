@@ -29,7 +29,7 @@ public class ArchiveFileStorage extends FileStorage
     private final static Logger logger 
 	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
-    Path baseDir;
+    private Path baseDir;
 
     public ArchiveFileStorage(File properties) throws IOException {
 	try {

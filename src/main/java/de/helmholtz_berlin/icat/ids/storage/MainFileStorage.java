@@ -28,7 +28,7 @@ public class MainFileStorage extends FileStorage
     private final static Logger logger 
 	= LoggerFactory.getLogger(MainFileStorage.class);
 
-    Path baseDir;
+    private Path baseDir;
 
     public MainFileStorage(File properties) throws IOException {
 	try {
