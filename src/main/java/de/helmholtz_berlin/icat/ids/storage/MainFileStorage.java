@@ -43,9 +43,10 @@ public class MainFileStorage extends FileStorage
     }
 
     public Path getPath(String location) throws IOException {
-	Path path = baseDir.resolve(location).normalize();
-	if (!path.getParent().startsWith(baseDir)) {
-	    throw new IOException("invalid directory in location " + location);
+	Path path = baseDir.resolve(location);
+	if (!(path.getParent().startsWith(baseDir) && 
+	      path.equals(path.normalize()))) {
+	    throw new IOException("invalid location " + location);
 	}
 	checkName(path.getFileName().toString());
 	return path;
