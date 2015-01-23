@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,9 +44,9 @@ public class MainFileStorage extends FileStorage
     }
 
     public Path getPath(String location) throws IOException {
-	Path path = baseDir.resolve(location);
-	if (!(path.getParent().startsWith(baseDir) && 
-	      path.equals(path.normalize()))) {
+	Path localPath = Paths.get(location);
+	Path path = baseDir.resolve(localPath);
+	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
 	    throw new IOException("invalid location " + location);
 	}
 	checkName(path.getFileName().toString());
