@@ -11,7 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
@@ -29,7 +34,11 @@ public class MainFileStorage extends FileStorage
     private final static Logger logger 
 	= LoggerFactory.getLogger(MainFileStorage.class);
 
+    public static final Pattern locationPrefixRegExp 
+	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
+
     private Path baseDir;
+    private Map<String, Path> extBaseDirs;
 
     public MainFileStorage(File properties) throws IOException {
 	try {
@@ -37,13 +46,114 @@ public class MainFileStorage extends FileStorage
 	    props.loadFromFile(properties.getPath());
 	    baseDir = props.getFile("dir").toPath();
 	    checkDir(baseDir, properties);
+
+	    extBaseDirs = new HashMap<>();
+	    String extDirlist = props.getProperty("extDir.list");
+	    if (!(extDirlist == null || extDirlist.trim().isEmpty())) {
+		String[] extDirs = extDirlist.trim().split("\\s+");
+		for (String extDir : extDirs) {
+		    String propName = "extDir." + extDir + ".dir";
+		    Path dir = props.getFile(propName).toPath();
+		    checkDir(dir, properties);
+		    extBaseDirs.put(extDir, dir);
+		}
+	    }
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
 	logger.info("MainFileStorage initialized");
     }
 
+    protected MatchResult checkLocationPrefix(String location) {
+	if (location == null) {
+	    return null;
+	}
+	Matcher m = locationPrefixRegExp.matcher(location);
+	if (m.matches()) {
+	    return m;
+	} else {
+	    return null;
+	}
+    }
+
+    /**
+     * Get a Path from a location.
+     *
+     * If the location contains a storage area prefix, it is resolved
+     * relative to the corresponding external storage area directory.
+     * Otherwise it is resolved relative to the main storage area.
+     */
     public Path getPath(String location) throws IOException {
+	Path base;
+	MatchResult m = checkLocationPrefix(location);
+	if (m == null) {
+	    // location is in the regular main storage area.
+	    base = baseDir;
+	} else {
+	    // location is in the external storage area as indicated
+	    // by the prefix.
+	    base = extBaseDirs.get(m.group(1));
+	    location = m.group(2);
+	    if (base == null) {
+		throw new IOException("unknown storage area " + m.group(1));
+	    }
+	}
+	Path localPath = Paths.get(location);
+	Path path = base.resolve(localPath);
+	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
+	    throw new IOException("invalid location " + location);
+	}
+	checkName(path.getFileName().toString());
+	return path;
+    }
+
+    /**
+     * Get a Path from a DsInfo.
+     *
+     * If the location attribute of the dataset is set and contains a
+     * storage area prefix, it is resolved relative to the
+     * corresponding external storage area directory.  Otherwise the
+     * canonical path derived from the dataset's attributes is build
+     * and resolved relative to the main storage area.
+     */
+    public Path getPath(DsInfo dsInfo) throws IOException {
+	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
+	if (m == null) {
+	    // location is in the regular main storage area.
+	    return baseDir.resolve(getRelPath(dsInfo));
+	} else {
+	    // location is in the external storage area as indicated
+	    // by the prefix.
+	    Path base = extBaseDirs.get(m.group(1));
+	    String location = m.group(2);
+	    if (base == null) {
+		throw new IOException("unknown storage area " + m.group(1));
+	    }
+	    Path localPath = Paths.get(location);
+	    Path path = base.resolve(localPath);
+	    if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
+		throw new IOException("invalid location " 
+				      + dsInfo.getDsLocation());
+	    }
+	    return path;
+	}
+    }
+
+    /**
+     * Get a Path in the main storage area from a location.
+     *
+     * Throw an IOException if the location contains a storage area
+     * prefix.  Otherwise the location is resolved relative to the
+     * main storage area.  This method should be called in the place
+     * of getPath() to resolve a location in a context where write
+     * access is needed.
+     */
+    public Path getMainPath(String location) throws IOException {
+	MatchResult m = checkLocationPrefix(location);
+	if (m != null) {
+	    throw new IOException("write access to external storage area " 
+				  + m.group(1) + " refused");
+	}
 	Path localPath = Paths.get(location);
 	Path path = baseDir.resolve(localPath);
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
@@ -61,6 +171,11 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public void delete(DsInfo dsInfo) throws IOException {
+	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
+	if (m != null) {
+	    throw new IOException("write access to external storage area " 
+				  + m.group(1) + " refused");
+	}
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
 	if (Files.exists(path)) {
@@ -72,14 +187,14 @@ public class MainFileStorage extends FileStorage
     @Override
     public void delete(String location, String createId, String modId) 
 	throws IOException {
-	Path path = getPath(location);
+	Path path = getMainPath(location);
 	Files.delete(path);
 	deleteParentDirs(baseDir, path);
     }
 
     @Override
     public boolean exists(DsInfo dsInfo) throws IOException {
-	return Files.exists(baseDir.resolve(getRelPath(dsInfo)));
+	return Files.exists(getPath(dsInfo));
     }
 
     @Override
@@ -96,6 +211,11 @@ public class MainFileStorage extends FileStorage
     @Override
     public String put(DsInfo dsInfo, String name, InputStream is) 
 	throws IOException {
+	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
+	if (m != null) {
+	    throw new IOException("write access to external storage area " 
+				  + m.group(1) + " refused");
+	}
 	checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
@@ -106,7 +226,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public void put(InputStream is, String location) throws IOException {
-	Path path = getPath(location);
+	Path path = getMainPath(location);
 	Files.createDirectories(path.getParent());
 	Files.copy(new BufferedInputStream(is), path);
     }
