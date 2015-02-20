@@ -16,7 +16,7 @@ public abstract class FileStorage {
     public static final Pattern visitIdRegExp 
 	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern nameRegExp 
-	= Pattern.compile("[0-9A-Za-z~._+-]+");
+	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
 
     protected void checkDir(Path dir, File props) throws IOException {
 	if (!Files.isDirectory(dir)) {
