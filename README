@@ -8,6 +8,13 @@ customized.
 
 * Release notes
 
+** Version 0.2.0 (2015-02-20)
+
+Implement external storage areas.  A prefix on the location of
+Datasets and Datafiles determines whether it is to be searched in an
+external storage area or not.  These external storage area are
+accessed read-only.
+
 ** Version 0.1.0 (2015-01-23)
 
 Basically a customized version of ids.storage_file.  Originally
