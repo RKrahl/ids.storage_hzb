@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +27,10 @@ import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.helmholtz_berlin.icat.ids.storage.DirLock;
+import de.helmholtz_berlin.icat.ids.storage.DirLockInputStream;
 import de.helmholtz_berlin.icat.ids.storage.FileStorage;
+
 
 public class MainFileStorage extends FileStorage 
     implements MainStorageInterface {
@@ -74,6 +78,34 @@ public class MainFileStorage extends FileStorage
 	} else {
 	    return null;
 	}
+    }
+
+    /**
+     * Delete a directory if it is empty.
+     *
+     * The argument path must be a directory in the main storage area
+     * below baseDir.  If this dierectory is either empty or contains
+     * only the lock file, it is deleted together with all parent
+     * directories (until one of the parents is not empty).  Do
+     * nothing if the directory contains any other file.
+     */
+    protected void deleteDirIfEmpty(Path dir) throws IOException {
+	Path lockf = null;
+	try (DirectoryStream<Path> entries = Files.newDirectoryStream(dir)) {
+	    for (Path entry: entries) {
+		if (entry.getFileName().toString().equals(".lock")) {
+		    lockf = entry;
+		} else {
+		    // found a normal file, dir is not empty, nothing to do.
+		    return;
+		}
+	    }
+	}
+	if (lockf != null) {
+	    Files.delete(lockf);
+	}
+	Files.delete(dir);
+	deleteParentDirs(baseDir, dir);
     }
 
     /**
@@ -177,19 +209,23 @@ public class MainFileStorage extends FileStorage
 				  + m.group(1) + " refused");
 	}
 	Path path = baseDir.resolve(getRelPath(dsInfo));
-	TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
-	if (Files.exists(path)) {
-	    Files.walkFileTree(path, treeDeleteVisitor);
+	try (DirLock lock = new DirLock(path, false)) {
+	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
+	    if (Files.exists(path)) {
+		Files.walkFileTree(path, treeDeleteVisitor);
+	    }
+	    deleteParentDirs(baseDir, path);
 	}
-	deleteParentDirs(baseDir, path);
     }
 
     @Override
     public void delete(String location, String createId, String modId) 
 	throws IOException {
 	Path path = getMainPath(location);
-	Files.delete(path);
-	deleteParentDirs(baseDir, path);
+	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	    Files.delete(path);
+	    deleteDirIfEmpty(path.getParent());
+	}
     }
 
     @Override
@@ -205,7 +241,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	return Files.newInputStream(getPath(location));
+	return new DirLockInputStream(getPath(location));
     }
 
     @Override
@@ -220,7 +256,9 @@ public class MainFileStorage extends FileStorage
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	Files.createDirectories(path.getParent());
-	Files.copy(new BufferedInputStream(is), path);
+	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	    Files.copy(new BufferedInputStream(is), path);
+	}
 	return location;
     }
 
@@ -228,7 +266,9 @@ public class MainFileStorage extends FileStorage
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
 	Files.createDirectories(path.getParent());
-	Files.copy(new BufferedInputStream(is), path);
+	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	    Files.copy(new BufferedInputStream(is), path);
+	}
     }
 
     @Override
