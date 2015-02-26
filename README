@@ -8,6 +8,10 @@ customized.
 
 * Release notes
 
+** Version 0.3.0 (2015-02-26)
+
+Implement locking of dataset directories in the main storage.
+
 ** Version 0.2.0 (2015-02-20)
 
 Implement external storage areas.  A prefix on the location of
