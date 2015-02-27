@@ -140,38 +140,6 @@ public class MainFileStorage extends FileStorage
     }
 
     /**
-     * Get a Path from a DsInfo.
-     *
-     * If the location attribute of the dataset is set and contains a
-     * storage area prefix, it is resolved relative to the
-     * corresponding external storage area directory.  Otherwise the
-     * canonical path derived from the dataset's attributes is build
-     * and resolved relative to the main storage area.
-     */
-    public Path getPath(DsInfo dsInfo) throws IOException {
-	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
-	if (m == null) {
-	    // location is in the regular main storage area.
-	    return baseDir.resolve(getRelPath(dsInfo));
-	} else {
-	    // location is in the external storage area as indicated
-	    // by the prefix.
-	    Path base = extBaseDirs.get(m.group(1));
-	    String location = m.group(2);
-	    if (base == null) {
-		throw new IOException("unknown storage area " + m.group(1));
-	    }
-	    Path localPath = Paths.get(location);
-	    Path path = base.resolve(localPath);
-	    if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
-		throw new IOException("invalid location " 
-				      + dsInfo.getDsLocation());
-	    }
-	    return path;
-	}
-    }
-
-    /**
      * Get a Path in the main storage area from a location.
      *
      * Throw an IOException if the location contains a storage area
@@ -230,7 +198,13 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public boolean exists(DsInfo dsInfo) throws IOException {
-	return Files.exists(getPath(dsInfo));
+	if (checkLocationPrefix(dsInfo.getDsLocation()) != null) {
+	    // Datasets in the external storage areas are assumed to
+	    // be always ONLINE.
+	    return true;
+	} else {
+	    return Files.exists(baseDir.resolve(getRelPath(dsInfo)));
+	}
     }
 
     @Override
