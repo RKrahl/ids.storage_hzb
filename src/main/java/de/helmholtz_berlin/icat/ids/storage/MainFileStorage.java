@@ -80,6 +80,14 @@ public class MainFileStorage extends FileStorage
 	}
     }
 
+    protected void assertMainLocation(String location) throws IOException {
+	MatchResult m = checkLocationPrefix(location);
+	if (m != null) {
+	    throw new IOException("write access to external storage area " 
+				  + m.group(1) + " refused");
+	}
+    }
+
     /**
      * Delete a directory if it is empty.
      *
@@ -149,11 +157,7 @@ public class MainFileStorage extends FileStorage
      * access is needed.
      */
     public Path getMainPath(String location) throws IOException {
-	MatchResult m = checkLocationPrefix(location);
-	if (m != null) {
-	    throw new IOException("write access to external storage area " 
-				  + m.group(1) + " refused");
-	}
+	assertMainLocation(location);
 	Path localPath = Paths.get(location);
 	Path path = baseDir.resolve(localPath);
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
@@ -171,11 +175,7 @@ public class MainFileStorage extends FileStorage
 
     @Override
     public void delete(DsInfo dsInfo) throws IOException {
-	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
-	if (m != null) {
-	    throw new IOException("write access to external storage area " 
-				  + m.group(1) + " refused");
-	}
+	assertMainLocation(dsInfo.getDsLocation());
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	try (DirLock lock = new DirLock(path, false)) {
 	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
@@ -221,11 +221,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public String put(DsInfo dsInfo, String name, InputStream is) 
 	throws IOException {
-	MatchResult m = checkLocationPrefix(dsInfo.getDsLocation());
-	if (m != null) {
-	    throw new IOException("write access to external storage area " 
-				  + m.group(1) + " refused");
-	}
+	assertMainLocation(dsInfo.getDsLocation());
 	checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
