@@ -8,6 +8,14 @@ customized.
 
 * Release notes
 
+** Version 0.3.1 (2015-02-27)
+
+Do not check the existence of dataset directories in external storage
+areas, rather assume them always to exist, e.g. always return true.
+This removes any semantic from the location attribute in Dataset other
+then the presence of a storage area prefix, e.g. for Dataset, the
+location does not need to be an existing file or directory.
+
 ** Version 0.3.0 (2015-02-26)
 
 Implement locking of dataset directories in the main storage.
