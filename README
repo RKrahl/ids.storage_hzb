@@ -2,8 +2,8 @@
 	 ---------------------------------------------------
 
 This directory contains an IDS storage plugin adapted to the needs of
-HZB.  It is current at an experimental stage, it.  It is mostly used
-to explore the IDS and to try out how IDS storage plugins can be
+HZB.  For the moment, it is in an experimental stage.  It is mostly
+used to explore the IDS and to try out how IDS storage plugins can be
 customized.
 
 * Release notes
