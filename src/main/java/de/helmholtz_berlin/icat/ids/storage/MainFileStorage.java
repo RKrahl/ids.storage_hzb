@@ -215,7 +215,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	if (checkLocationPrefix(dsInfo.getDsLocation()) != null) {
+	if (checkLocationPrefix(location) != null) {
 	    return Files.newInputStream(getPath(location));
 	} else {
 	    return new DirLockInputStream(getPath(location));
