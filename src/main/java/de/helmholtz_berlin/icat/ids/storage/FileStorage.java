@@ -2,6 +2,7 @@ package de.helmholtz_berlin.icat.ids.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -60,15 +61,15 @@ public abstract class FileStorage {
 	    + "/" + dsName;
     }
 
-    protected void deleteParentDirs(Path baseDir, Path path) {
+    protected void deleteParentDirs(Path baseDir, Path path) 
+	throws IOException {
 	path = path.getParent();
 	try {
 	    while (!path.equals(baseDir)) {
 		Files.delete(path);
 		path = path.getParent();
 	    }
-	} catch (IOException e) {
-	    // Directory probably not empty
+	} catch (DirectoryNotEmptyException e) {
 	}
     }
 
