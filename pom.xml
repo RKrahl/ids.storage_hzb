@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.helmholtz_berlin.icat</groupId>
     <artifactId>ids.storage_hzb</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <name>IDS storage_hzb</name>
 
     <properties>

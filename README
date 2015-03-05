@@ -8,6 +8,15 @@ customized.
 
 * Release notes
 
+** Version 0.3.2 (2015-03-05)
+
+Bugfixes:
+
+ + Must not lock directories in external storage areas.
+
+ + Create the directory lock file in the parent directory rather then
+   in the directory itself.
+
 ** Version 0.3.1 (2015-02-27)
 
 Do not check the existence of dataset directories in external storage
