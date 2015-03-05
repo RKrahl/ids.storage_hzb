@@ -47,9 +47,15 @@ public class DirLock implements Closeable {
 	logger.debug("Lock on " + dirname + " acquired");
     }
 
+    private Path getLockf(Path dir) {
+	Path parent = dir.getParent();
+	String name = dir.getFileName().toString();
+	return parent.resolve("." + name + ".lock");
+    }
+
     public DirLock(Path dir, boolean shared) throws IOException {
 	dirname = dir.toString();
-	lockf = Paths.get(dirname + ".lock");
+	lockf = getLockf(dir);
 	acquireLock(shared);
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
 	Files.setLastModifiedTime(dir, now);
