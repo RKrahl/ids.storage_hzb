@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,34 +90,6 @@ public class MainFileStorage extends FileStorage
     }
 
     /**
-     * Delete a directory if it is empty.
-     *
-     * The argument path must be a directory in the main storage area
-     * below baseDir.  If this dierectory is either empty or contains
-     * only the lock file, it is deleted together with all parent
-     * directories (until one of the parents is not empty).  Do
-     * nothing if the directory contains any other file.
-     */
-    protected void deleteDirIfEmpty(Path dir) throws IOException {
-	Path lockf = null;
-	try (DirectoryStream<Path> entries = Files.newDirectoryStream(dir)) {
-	    for (Path entry: entries) {
-		if (entry.getFileName().toString().equals(".lock")) {
-		    lockf = entry;
-		} else {
-		    // found a normal file, dir is not empty, nothing to do.
-		    return;
-		}
-	    }
-	}
-	if (lockf != null) {
-	    Files.delete(lockf);
-	}
-	Files.delete(dir);
-	deleteParentDirs(baseDir, dir);
-    }
-
-    /**
      * Get a Path from a location.
      *
      * If the location contains a storage area prefix, it is resolved
@@ -176,24 +149,31 @@ public class MainFileStorage extends FileStorage
     @Override
     public void delete(DsInfo dsInfo) throws IOException {
 	assertMainLocation(dsInfo.getDsLocation());
-	Path path = baseDir.resolve(getRelPath(dsInfo));
-	try (DirLock lock = new DirLock(path, false)) {
-	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
-	    if (Files.exists(path)) {
-		Files.walkFileTree(path, treeDeleteVisitor);
+	Path dir = baseDir.resolve(getRelPath(dsInfo));
+	if (Files.exists(dir)) {
+	    try (DirLock lock = new DirLock(dir, false)) {
+		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
+		Files.walkFileTree(dir, treeDeleteVisitor);
+		lock.deleteLockf();
 	    }
-	    deleteParentDirs(baseDir, path);
 	}
+	deleteParentDirs(baseDir, dir);
     }
 
     @Override
     public void delete(String location, String createId, String modId) 
 	throws IOException {
 	Path path = getMainPath(location);
-	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	Path dir = path.getParent();
+	try (DirLock lock = new DirLock(dir, false)) {
 	    Files.delete(path);
-	    deleteDirIfEmpty(path.getParent());
+	    try {
+		Files.delete(dir);
+		lock.deleteLockf();
+	    } catch (DirectoryNotEmptyException e) {
+	    }
 	}
+	deleteParentDirs(baseDir, dir);
     }
 
     @Override
