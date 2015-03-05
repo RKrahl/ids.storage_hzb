@@ -48,11 +48,6 @@ public class DirLock implements Closeable {
 	Files.setLastModifiedTime(lockf, now);
     }
 
-    public DirLock(Path dir, boolean shared, Path fname) throws IOException {
-	dirname = dir.toString();
-	acquireLock(dir.resolve(fname), shared);
-    }
-
     public DirLock(Path dir, boolean shared) throws IOException {
 	dirname = dir.toString();
 	acquireLock(dir.resolve(".lock"), shared);
