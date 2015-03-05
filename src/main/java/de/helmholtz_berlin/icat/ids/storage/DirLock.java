@@ -43,14 +43,13 @@ public class DirLock implements Closeable {
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().lock(0L, Long.MAX_VALUE, shared);
 	logger.debug("Lock on " + dirname + " acquired");
-
-	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
-	Files.setLastModifiedTime(lockf, now);
     }
 
     public DirLock(Path dir, boolean shared) throws IOException {
 	dirname = dir.toString();
 	acquireLock(dir.resolve(".lock"), shared);
+	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
+	Files.setLastModifiedTime(dir, now);
     }
 
     public void release() throws IOException {
