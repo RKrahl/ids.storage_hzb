@@ -28,12 +28,13 @@ public class DirLock implements Closeable {
     private final static Logger logger 
 	= LoggerFactory.getLogger(DirLock.class);
 
+    private String dirname;
+    private Path lockf;
+
     private RandomAccessFile lf;
     private FileLock lock;
 
-    private String dirname;
-
-    private void acquireLock(Path lockf, boolean shared) throws IOException {
+    private void acquireLock(boolean shared) throws IOException {
 	String lockmode;
 	if (shared) {
 	    lockmode = "shared";
@@ -48,7 +49,8 @@ public class DirLock implements Closeable {
 
     public DirLock(Path dir, boolean shared) throws IOException {
 	dirname = dir.toString();
-	acquireLock(Paths.get(dirname + ".lock"), shared);
+	lockf = Paths.get(dirname + ".lock");
+	acquireLock(shared);
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
 	Files.setLastModifiedTime(dir, now);
     }
@@ -61,6 +63,10 @@ public class DirLock implements Closeable {
 
     public void close() throws IOException {
 	release();
+    }
+
+    public void deleteLockf() throws IOException {
+	Files.delete(lockf);
     }
 
 }
