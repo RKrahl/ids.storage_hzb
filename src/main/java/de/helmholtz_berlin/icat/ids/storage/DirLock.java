@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class DirLock implements Closeable {
 
     public DirLock(Path dir, boolean shared) throws IOException {
 	dirname = dir.toString();
-	acquireLock(dir.resolve(".lock"), shared);
+	acquireLock(Paths.get(dirname + ".lock"), shared);
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
 	Files.setLastModifiedTime(dir, now);
     }
