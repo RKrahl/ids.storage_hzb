@@ -8,6 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,14 @@ public class DirLock implements Closeable {
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().lock(0L, Long.MAX_VALUE, shared);
 	logger.debug("Lock on " + dirname + " acquired");
+	Set<PosixFilePermission> rwall = 
+	    EnumSet.of(PosixFilePermission.OWNER_READ, 
+		       PosixFilePermission.OWNER_WRITE, 
+		       PosixFilePermission.GROUP_READ, 
+		       PosixFilePermission.GROUP_WRITE, 
+		       PosixFilePermission.OTHERS_READ, 
+		       PosixFilePermission.OTHERS_WRITE);
+	Files.setPosixFilePermissions(lockf, rwall);
     }
 
     public DirLock(Path dir, boolean shared) throws IOException {
