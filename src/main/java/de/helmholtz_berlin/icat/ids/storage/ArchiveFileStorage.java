@@ -79,9 +79,12 @@ public class ArchiveFileStorage extends FileStorage
 	String inpath = baseDir.resolve(location).toString();
 	try (FileInputStream in = new FileInputStream(inpath)) {
 	    FileChannel inch = in.getChannel();
+	    logger.debug("Try to acquire shared lock on " + inpath);
 	    try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
+		logger.debug("Lock on " + inpath + " acquired");
 		Files.copy(in, path, 
 			   StandardCopyOption.REPLACE_EXISTING);
+		logger.debug("Release lock on " + inpath);
 	    }
 	}
     }
