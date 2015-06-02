@@ -13,8 +13,7 @@
     <description>HZB storage plugin for ICAT Data Service.</description>
 
     <scm>
-        <connection>scm:svn:http://manti.exp.bessy.de/svn/icat/ids-plugin-hzb</connection>
-        <developerConnection>scm:svn:http://manti.exp.bessy.de/svn/icat/ids-plugin-hzb</developerConnection>
+        <connection>scm:git:https://github.com/RKrahl/ids.storage_hzb.git</connection>
     </scm>
 
     <organization>
