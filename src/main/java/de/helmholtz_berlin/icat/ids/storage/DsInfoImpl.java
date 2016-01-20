@@ -23,13 +23,14 @@ public class DsInfoImpl implements DsInfo {
      * This is in a sense the invers of
      * FileStorage.getRelPath(DsInfo).
      * 
-     * The relative paths are of the form cycle/invName/visitId/dsName
+     * The relative paths are of the form
+     * facility/cycle/invName/visitId/data/dsName
      */
     public DsInfoImpl(Path relPath) throws IllegalArgumentException {
 	this.facilityName = relPath.getName(0).toString();;
 	this.invName = relPath.getName(2).toString();
 	this.visitId = relPath.getName(3).toString();
-	this.dsName = relPath.getName(4).toString();
+	this.dsName = relPath.getName(5).toString();
 	this.size = 0;
 	this.lastModifiedTime = FileTime.fromMillis(0);
     }

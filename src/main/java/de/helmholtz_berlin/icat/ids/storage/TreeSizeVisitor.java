@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.helmholtz_berlin.icat.ids.storage.DsInfoImpl;
+import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 
@@ -44,12 +45,12 @@ public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 	Path relPath = baseDir.relativize(dir);
 	int numPathEle = relPath.getNameCount();
 
-	if (numPathEle < 5) {
+	if (numPathEle < FileStorage.dsRelPathNameCount) {
 
 	    // ignore directory levels above dataset dirs.
 	    return FileVisitResult.CONTINUE;
 
-	} else if (numPathEle == 5) {
+	} else if (numPathEle == FileStorage.dsRelPathNameCount) {
 
 	    DsInfoImpl dsInfo = new DsInfoImpl(relPath);
 	    dsInfo.addSize(attrs.size());
@@ -73,7 +74,7 @@ public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 	Path relPath = baseDir.relativize(file);
 	int numPathEle = relPath.getNameCount();
 
-	if (numPathEle <= 5) {
+	if (numPathEle <= FileStorage.dsRelPathNameCount) {
 
 	    // ignore directory levels above dataset dirs.
 	    return FileVisitResult.CONTINUE;

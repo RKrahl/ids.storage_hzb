@@ -12,6 +12,10 @@ import org.icatproject.ids.plugin.DsInfo;
 
 public abstract class FileStorage {
 
+    // Number of name elements in the relative path down to dataset
+    // level.  Must be in sync with the return value of getRelPath().
+    public static final int dsRelPathNameCount = 6;
+
     public static final Pattern invNameRegExp 
 	= Pattern.compile("(\\d{3})\\d{5}-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern visitIdRegExp 
@@ -58,6 +62,7 @@ public abstract class FileStorage {
 	return facilityName + "/" + cycle 
 	    + "/" + invName.replace('/', '_') 
 	    + "/" + visitId.replace('/', '_') 
+	    + "/data"
 	    + "/" + dsName;
     }
 
