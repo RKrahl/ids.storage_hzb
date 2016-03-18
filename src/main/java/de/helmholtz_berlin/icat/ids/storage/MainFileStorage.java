@@ -242,9 +242,12 @@ public class MainFileStorage extends FileStorage
 
 	long size = treeSizeVisitor.getTotalSize();
 	if (size < highArchivingLevel) {
+	    logger.debug("Size " + size + " < highArchivingLevel " + 
+			 highArchivingLevel + " no action");
 	    return Collections.emptyList();
 	}
 	long recover = size - lowArchivingLevel;
+	logger.debug("Want to reduce size by " + recover);
 
 	List<DsInfo> result = new ArrayList<>();
 	for (DsInfoImpl dsInfo : treeSizeVisitor.getDsInfos()) {
@@ -254,6 +257,7 @@ public class MainFileStorage extends FileStorage
 		break;
 	    }
 	}
+	logger.debug(result.size() + " DsInfos returned to reduce size");
 	return result;
     }
 

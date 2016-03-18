@@ -30,12 +30,12 @@ if arg == "INSTALL":
    
     try:     
         app = actions.getAppName("ids.server")
-        if app: actions.asadmin("disable " + app)   
+        if app: actions.disableApp(app)   
         actions.removeFromApplibs("ids.storage_hzb*.jar")    
         actions.installToApplibs("ids.storage_hzb*.jar")
         actions.stopDomain()
         actions.startDomain()
-        if app: actions.asadmin("enable " + app) 
+        if app: actions.enableApp(app) 
     except Exception, e:
         raise
         abort(str(e))
