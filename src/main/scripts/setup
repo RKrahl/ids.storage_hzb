@@ -4,8 +4,7 @@ import os
 
 # ids.storage_hzb
 
-actions, options, arg = getActions()
-props = actions.getGlassfish("ids.storage_hzb-setup.properties", ["glassfish", "port"])
+actions, arg, props = getActions("ids.storage_hzb-setup.properties", [])
 
 prop_lists = {}
 prop_lists["ids.storage_hzb.main.properties"] = ["dir"]
@@ -20,12 +19,12 @@ if arg in ["CONFIGURE", "INSTALL"]:
 if arg == "INSTALL":
         
     for prop_name, prop_list in prop_lists.items():
-        props = actions.getProperties(prop_name, prop_list)
+        props = getProperties(prop_name, prop_list)
         if not actions.configFileExists(props.get("dir")):
             abort("Please create directory " + props.get("dir") + " relative to the config directory as specified in " + prop_name)
     
     for prop_name, prop_list in prop_lists.items():
-        actions.getProperties(prop_name, prop_list)
+        getProperties(prop_name, prop_list)
         actions.installFile(prop_name)
    
     try:     

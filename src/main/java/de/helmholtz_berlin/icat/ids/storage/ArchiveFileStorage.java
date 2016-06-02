@@ -18,16 +18,11 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class ArchiveFileStorage extends FileStorage 
     implements ArchiveStorageInterface {
-
-    private final static Logger logger 
-	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
     private Path baseDir;
 
@@ -40,7 +35,6 @@ public class ArchiveFileStorage extends FileStorage
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
-	logger.info("ArchiveFileStorage initialized");
     }
 
     @Override
@@ -79,12 +73,9 @@ public class ArchiveFileStorage extends FileStorage
 	String inpath = baseDir.resolve(location).toString();
 	try (FileInputStream in = new FileInputStream(inpath)) {
 	    FileChannel inch = in.getChannel();
-	    logger.debug("Try to acquire shared lock on " + inpath);
 	    try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
-		logger.debug("Lock on " + inpath + " acquired");
 		Files.copy(in, path, 
 			   StandardCopyOption.REPLACE_EXISTING);
-		logger.debug("Release lock on " + inpath);
 	    }
 	}
     }
