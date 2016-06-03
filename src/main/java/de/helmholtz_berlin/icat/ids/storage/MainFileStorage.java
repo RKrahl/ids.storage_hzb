@@ -25,6 +25,8 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.helmholtz_berlin.icat.ids.storage.DirLock;
 import de.helmholtz_berlin.icat.ids.storage.DirLockInputStream;
@@ -33,6 +35,9 @@ import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class MainFileStorage extends FileStorage 
     implements MainStorageInterface {
+
+    private final static Logger logger 
+	= LoggerFactory.getLogger(MainFileStorage.class);
 
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
@@ -61,6 +66,7 @@ public class MainFileStorage extends FileStorage
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
+	logger.info("MainFileStorage initialized");
     }
 
     protected MatchResult checkLocationPrefix(String location) {
@@ -236,9 +242,12 @@ public class MainFileStorage extends FileStorage
 
 	long size = treeSizeVisitor.getTotalSize();
 	if (size < highArchivingLevel) {
+	    logger.debug("Size " + size + " < highArchivingLevel " + 
+			 highArchivingLevel + " no action");
 	    return Collections.emptyList();
 	}
 	long recover = size - lowArchivingLevel;
+	logger.debug("Want to reduce size by " + recover);
 
 	List<DsInfo> result = new ArrayList<>();
 	for (DsInfoImpl dsInfo : treeSizeVisitor.getDsInfos()) {
@@ -248,6 +257,7 @@ public class MainFileStorage extends FileStorage
 		break;
 	    }
 	}
+	logger.debug(result.size() + " DsInfos returned to reduce size");
 	return result;
     }
 
