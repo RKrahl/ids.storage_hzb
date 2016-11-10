@@ -20,6 +20,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.icatproject.ids.plugin.AlreadyLockedException;
 import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
@@ -29,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.helmholtz_berlin.icat.ids.storage.DirLock;
-import de.helmholtz_berlin.icat.ids.storage.DirLockInputStream;
 import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 
@@ -151,10 +151,8 @@ public class MainFileStorage extends FileStorage
 	assertMainLocation(dsInfo.getDsLocation());
 	Path dir = baseDir.resolve(getRelPath(dsInfo));
 	if (Files.exists(dir)) {
-	    try (DirLock lock = new DirLock(dir, false)) {
-		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
-		Files.walkFileTree(dir, treeDeleteVisitor);
-	    }
+	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
+	    Files.walkFileTree(dir, treeDeleteVisitor);
 	}
     }
 
@@ -163,12 +161,10 @@ public class MainFileStorage extends FileStorage
 	throws IOException {
 	Path path = getMainPath(location);
 	Path dir = path.getParent();
-	try (DirLock lock = new DirLock(dir, false)) {
-	    Files.delete(path);
-	    try {
-		Files.delete(dir);
-	    } catch (DirectoryNotEmptyException e) {
-	    }
+	Files.delete(path);
+	try {
+	    Files.delete(dir);
+	} catch (DirectoryNotEmptyException e) {
 	}
     }
 
@@ -191,11 +187,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	if (checkLocationPrefix(location) != null) {
-	    return Files.newInputStream(getPath(location));
-	} else {
-	    return new DirLockInputStream(getPath(location));
-	}
+	return Files.newInputStream(getPath(location));
     }
 
     @Override
@@ -206,9 +198,7 @@ public class MainFileStorage extends FileStorage
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	Files.createDirectories(path.getParent());
-	try (DirLock lock = new DirLock(path.getParent(), false)) {
-	    Files.copy(new BufferedInputStream(is), path);
-	}
+	Files.copy(new BufferedInputStream(is), path);
 	return location;
     }
 
@@ -216,9 +206,7 @@ public class MainFileStorage extends FileStorage
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
 	Files.createDirectories(path.getParent());
-	try (DirLock lock = new DirLock(path.getParent(), false)) {
-	    Files.copy(new BufferedInputStream(is), path);
-	}
+	Files.copy(new BufferedInputStream(is), path);
     }
 
     @Override
@@ -255,6 +243,12 @@ public class MainFileStorage extends FileStorage
 	}
 	logger.debug("{} DsInfos returned to reduce size", result.size());
 	return result;
+    }
+
+    @Override
+    public AutoCloseable lock(DsInfo dsInfo, boolean shared)
+	throws AlreadyLockedException, IOException {
+	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
     }
 
 }

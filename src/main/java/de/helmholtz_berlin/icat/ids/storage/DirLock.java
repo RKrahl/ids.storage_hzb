@@ -12,6 +12,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.icatproject.ids.plugin.AlreadyLockedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +39,14 @@ public class DirLock implements Closeable {
     private RandomAccessFile lf;
     private FileLock lock;
 
-    private void acquireLock() throws IOException {
+    private void acquireLock() throws AlreadyLockedException, IOException {
 	logger.debug("Try to acquire a {} lock on {}.", 
 		     (shared ? "shared" : "exclusive"), dirname);
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
-	lock = lf.getChannel().lock(0L, Long.MAX_VALUE, shared);
+	lock = lf.getChannel().tryLock(0L, Long.MAX_VALUE, shared);
+	if (lock == null) {
+	    throw new AlreadyLockedException();
+	}
 	logger.debug("Lock on {} acquired.", dirname);
 	Set<PosixFilePermission> rwall = 
 	    EnumSet.of(PosixFilePermission.OWNER_READ, 
@@ -54,7 +58,8 @@ public class DirLock implements Closeable {
 	Files.setPosixFilePermissions(lockf, rwall);
     }
 
-    public DirLock(Path dir, boolean shared) throws IOException {
+    public DirLock(Path dir, boolean shared) 
+	throws AlreadyLockedException, IOException {
 	String name = dir.getFileName().toString();
 	this.dirname = dir.toString();
 	this.lockf = dir.getParent().resolve("." + name + ".lock");
