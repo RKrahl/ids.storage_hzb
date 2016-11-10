@@ -154,7 +154,6 @@ public class MainFileStorage extends FileStorage
 	    try (DirLock lock = new DirLock(dir, false)) {
 		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
 		Files.walkFileTree(dir, treeDeleteVisitor);
-		lock.deleteLockf();
 	    }
 	}
 	deleteParentDirs(baseDir, dir);
@@ -169,7 +168,6 @@ public class MainFileStorage extends FileStorage
 	    Files.delete(path);
 	    try {
 		Files.delete(dir);
-		lock.deleteLockf();
 	    } catch (DirectoryNotEmptyException e) {
 	    }
 	}

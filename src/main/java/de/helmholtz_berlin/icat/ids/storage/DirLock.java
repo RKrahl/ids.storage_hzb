@@ -33,11 +33,12 @@ public class DirLock implements Closeable {
 
     private String dirname;
     private Path lockf;
+    private boolean shared;
 
     private RandomAccessFile lf;
     private FileLock lock;
 
-    private void acquireLock(boolean shared) throws IOException {
+    private void acquireLock() throws IOException {
 	logger.debug("Try to acquire a {} lock on {}.", 
 		     (shared ? "shared" : "exclusive"), dirname);
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
@@ -54,26 +55,26 @@ public class DirLock implements Closeable {
     }
 
     public DirLock(Path dir, boolean shared) throws IOException {
-	dirname = dir.toString();
 	String name = dir.getFileName().toString();
-	lockf = dir.getParent().resolve("." + name + ".lock");
-	acquireLock(shared);
+	this.dirname = dir.toString();
+	this.lockf = dir.getParent().resolve("." + name + ".lock");
+	this.shared = shared;
+	acquireLock();
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
 	Files.setLastModifiedTime(dir, now);
     }
 
     public void release() throws IOException {
 	logger.debug("Release lock on {}.", dirname);
+	if (!shared) {
+	    Files.delete(lockf);
+	}
 	lock.release();
 	lf.close();
     }
 
     public void close() throws IOException {
 	release();
-    }
-
-    public void deleteLockf() throws IOException {
-	Files.delete(lockf);
     }
 
 }
