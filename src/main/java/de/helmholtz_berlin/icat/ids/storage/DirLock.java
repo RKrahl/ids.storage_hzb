@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * class DirLock
  *
  * Set a lock on a directory by acquiring a file lock on a special
- * file in this directory.  The lock may either be shared or
+ * file in the parent directory.  The lock may either be shared or
  * exclusive.
  *
  *********************************************************************/
