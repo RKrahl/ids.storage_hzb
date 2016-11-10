@@ -38,16 +38,11 @@ public class DirLock implements Closeable {
     private FileLock lock;
 
     private void acquireLock(boolean shared) throws IOException {
-	String lockmode;
-	if (shared) {
-	    lockmode = "shared";
-	} else {
-	    lockmode = "exclusive";
-	}
-	logger.debug("Try to acquire " + lockmode + " lock on " + dirname);
+	logger.debug("Try to acquire a {} lock on {}.", 
+		     (shared ? "shared" : "exclusive"), dirname);
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().lock(0L, Long.MAX_VALUE, shared);
-	logger.debug("Lock on " + dirname + " acquired");
+	logger.debug("Lock on {} acquired.", dirname);
 	Set<PosixFilePermission> rwall = 
 	    EnumSet.of(PosixFilePermission.OWNER_READ, 
 		       PosixFilePermission.OWNER_WRITE, 
@@ -68,7 +63,7 @@ public class DirLock implements Closeable {
     }
 
     public void release() throws IOException {
-	logger.debug("Release lock on " + dirname);
+	logger.debug("Release lock on {}.", dirname);
 	lock.release();
 	lf.close();
     }
