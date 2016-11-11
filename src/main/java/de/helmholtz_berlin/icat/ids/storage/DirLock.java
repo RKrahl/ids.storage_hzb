@@ -67,7 +67,12 @@ public class DirLock implements Closeable {
 	this.shared = shared;
 	acquireLock();
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
-	Files.setLastModifiedTime(dir, now);
+	if (Files.isDirectory(dir)) {
+	    // Touch the directory to mark it's recently being accessed.
+	    // This will be taken into account in
+	    // MainFileStorage.getDatasetsToArchive()
+	    Files.setLastModifiedTime(dir, now);
+	}
 	Files.setLastModifiedTime(lockf, now);
     }
 
