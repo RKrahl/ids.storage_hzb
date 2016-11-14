@@ -23,6 +23,30 @@ public abstract class FileStorage {
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
 
+    /*
+     * Helper method to delete all parent directories of a path,
+     * assuming the the file or directory with this path has already
+     * been deleted.  Continue deleting parent directories until
+     * either a parent is not a proper subdirectory of baseDir or
+     * DirectoryNotEmptyException is thrown, whichever comes first.
+     */
+    public static void deleteParentDirs(Path baseDir, Path path) 
+	throws IOException {
+	path = path.getParent();
+	try {
+	    while (true) {
+		Path parent = path.getParent();
+		if (!parent.startsWith(baseDir)) {
+		    // path is not a subdirectory of baseDir
+		    break;
+		}
+		Files.delete(path);
+		path = parent;
+	    }
+	} catch (DirectoryNotEmptyException e) {
+	}
+    }
+
     protected void checkDir(Path dir, File props) throws IOException {
 	if (!Files.isDirectory(dir)) {
 	    throw new IOException(dir + " as specified in " + props 
@@ -64,18 +88,6 @@ public abstract class FileStorage {
 	    + "/" + visitId.replace('/', '_') 
 	    + "/data"
 	    + "/" + dsName;
-    }
-
-    protected void deleteParentDirs(Path baseDir, Path path) 
-	throws IOException {
-	path = path.getParent();
-	try {
-	    while (!path.equals(baseDir)) {
-		Files.delete(path);
-		path = path.getParent();
-	    }
-	} catch (DirectoryNotEmptyException e) {
-	}
     }
 
 }
