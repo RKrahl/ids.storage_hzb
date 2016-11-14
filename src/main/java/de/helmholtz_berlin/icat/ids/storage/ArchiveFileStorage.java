@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -51,8 +52,11 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void delete(DsInfo dsInfo) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
-	Files.delete(path);
-	deleteParentDirs(baseDir, path);
+	try {
+	    Files.delete(path);
+	    deleteParentDirs(baseDir, path);
+	} catch (NoSuchFileException e) {
+	}
     }
 
     @Override
