@@ -25,6 +25,29 @@ import org.slf4j.LoggerFactory;
  * file in the parent directory.  The lock may either be shared or
  * exclusive.
  *
+ * Note that it is practically impossible to safely remove a lock file
+ * from the storage without a race condition.  On the other hand, not
+ * deleting lock files, leaving them pile up forever in the main
+ * storage is no option either.  We ressort to the following strategy:
+ * - Remove lock files immediatly before releasing an exclusive lock.
+ *   Leave the lock file if we obtained a shared lock.
+ * - Always use non-blocking calls to obtain a lock (e.g. tryLock()
+ *   rather then lock().
+ * This minimizes the risk, but still there is a race condition:
+ * 1. A acquires an exclusive lock.
+ * 2. B wants to acquire a lock and opens the lock file.
+ * 3. A removes the lock file from the file system.
+ * 4. A releases the lock.
+ * 5. B acquires the lock.  Note that B now holds the lock, but there
+ *    is no lock file any more in the file system.
+ * 6. C acquires the lock.  Since there is no lock file, C creates a
+ *    new one.  Now B and C both hold possibly conflicting locks.
+ *
+ * Note that this is not a bug in this particular implementation, but
+ * rather a design flaw in POSIX fcntl() style locks.  The problem is
+ * that fcntl() locks are obtained on open file descriptors and there
+ * is no way to open and lock a file in one single atomic operation.
+ *
  *********************************************************************/
 
 public class DirLock implements Closeable {
