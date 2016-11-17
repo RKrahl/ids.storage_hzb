@@ -102,7 +102,7 @@ public class DirLock implements Closeable {
 	Files.setPosixFilePermissions(lockf, rwall);
     }
 
-    public DirLock(Path dir, boolean shared) 
+    public DirLock(Path dir, boolean shared, boolean touchDataset) 
 	throws AlreadyLockedException, IOException {
 	String name = dir.getFileName().toString();
 	this.dirname = dir.toString();
@@ -110,7 +110,7 @@ public class DirLock implements Closeable {
 	this.shared = shared;
 	acquireLock();
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
-	if (Files.isDirectory(dir)) {
+	if (touchDataset && Files.isDirectory(dir)) {
 	    // Touch the directory to mark it's recently being accessed.
 	    // This will be taken into account in
 	    // MainFileStorage.getDatasetsToArchive()

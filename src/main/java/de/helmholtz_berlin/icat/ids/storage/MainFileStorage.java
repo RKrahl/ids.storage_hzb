@@ -255,7 +255,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public AutoCloseable lock(DsInfo dsInfo, boolean shared)
 	throws AlreadyLockedException, IOException {
-	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
+	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared, true);
     }
 
 }

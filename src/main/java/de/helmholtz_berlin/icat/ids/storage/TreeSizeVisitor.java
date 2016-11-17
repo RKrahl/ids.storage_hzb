@@ -101,7 +101,7 @@ public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 	    if (lastModified.isBefore(oldLockThreshold)) {
 		Path dir = DirLock.getDirPath(file);
 		if (dir != null) {
-		    try (DirLock lock = new DirLock(dir, false)) {
+		    try (DirLock lock = new DirLock(dir, false, false)) {
 			if (!dir.toFile().exists()) {
 			    Files.delete(file);
 			}
