@@ -11,6 +11,8 @@ import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.icatproject.ids.plugin.AlreadyLockedException;
 import org.slf4j.Logger;
@@ -55,12 +57,30 @@ public class DirLock implements Closeable {
     private final static Logger logger 
 	= LoggerFactory.getLogger(DirLock.class);
 
+    public static final Pattern lockFilenameRegExp 
+	= Pattern.compile("\\.(.*)\\.lock");
+
     private String dirname;
     private Path lockf;
     private boolean shared;
 
     private RandomAccessFile lf;
     private FileLock lock;
+
+    /* 
+     * Returns the path of the dataset directory corresponding to a
+     * lock file path or null if the given path does not belong to a
+     * lock file.
+     */
+    public static Path getDirPath(Path lockfilePath) {
+	String lockname = lockfilePath.getFileName().toString();
+	Matcher m = lockFilenameRegExp.matcher(lockname);
+	if (m.matches()) {
+	    return lockfilePath.getParent().resolve(m.group(1));
+	} else {
+	    return null;
+	}
+    }
 
     private void acquireLock() throws AlreadyLockedException, IOException {
 	logger.debug("Try to acquire a {} lock on {}.", 

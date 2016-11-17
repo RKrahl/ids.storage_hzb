@@ -11,3 +11,12 @@ dir = /srv/ids/storage_file/data/
 # configured in extDir.list.
 !extDir.exta.dir = /srv/ids/storage_file/external-data-a/
 !extDir.extb.dir = /srv/ids/storage_file/b-files/
+
+# The plugin removes old lock files from main storage.  How old is old
+# in seconds?  Note that on one hand this cleanup is not urgent and on
+# the hand, the respective lock file should not be removed as long as
+# there are still ongoing requests for the corresponding dataset.  So
+# set this to a fairly large value.  A few hours might be a good value
+# for production.  A value of 0 or not setting it at all disables this
+# feature.
+!oldLockSeconds = 7200

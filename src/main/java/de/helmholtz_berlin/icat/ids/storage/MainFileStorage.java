@@ -44,6 +44,7 @@ public class MainFileStorage extends FileStorage
 
     private Path baseDir;
     private Map<String, Path> extBaseDirs;
+    private long oldLockSeconds;
 
     public MainFileStorage(File properties) throws IOException {
 	try {
@@ -62,6 +63,11 @@ public class MainFileStorage extends FileStorage
 		    checkDir(dir, properties);
 		    extBaseDirs.put(extDir, dir);
 		}
+	    }
+	    if (props.has("oldLockSeconds")) {
+		oldLockSeconds = props.getNonNegativeLong("oldLockSeconds");
+	    } else {
+		oldLockSeconds = 0;
 	    }
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
@@ -221,7 +227,8 @@ public class MainFileStorage extends FileStorage
 					     long highArchivingLevel)
 	throws IOException {
 
-	TreeSizeVisitor treeSizeVisitor = new TreeSizeVisitor(baseDir);
+	TreeSizeVisitor treeSizeVisitor 
+	    = new TreeSizeVisitor(baseDir, oldLockSeconds);
 	Files.walkFileTree(baseDir, treeSizeVisitor);
 
 	long size = treeSizeVisitor.getTotalSize();
