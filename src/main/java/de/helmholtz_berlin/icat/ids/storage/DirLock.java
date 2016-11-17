@@ -66,9 +66,6 @@ public class DirLock implements Closeable {
 
     public void release() throws IOException {
 	logger.debug("Release lock on {}.", dirname);
-	if (!shared) {
-	    Files.delete(lockf);
-	}
 	lock.release();
 	lf.close();
     }
