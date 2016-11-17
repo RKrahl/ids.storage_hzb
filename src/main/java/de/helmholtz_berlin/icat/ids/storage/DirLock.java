@@ -62,6 +62,7 @@ public class DirLock implements Closeable {
 	acquireLock();
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
 	Files.setLastModifiedTime(dir, now);
+	Files.setLastModifiedTime(lockf, now);
     }
 
     public void release() throws IOException {
