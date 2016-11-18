@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -56,6 +57,8 @@ public class DirLock implements Closeable {
 
     private final static Logger logger 
 	= LoggerFactory.getLogger(DirLock.class);
+    private final static Set<PosixFilePermission> allrwPermissions 
+	    = PosixFilePermissions.fromString("rw-rw-rw-");
 
     public static final Pattern lockFilenameRegExp 
 	= Pattern.compile("\\.(.*)\\.lock");
@@ -92,14 +95,7 @@ public class DirLock implements Closeable {
 	    throw new AlreadyLockedException();
 	}
 	logger.debug("Lock on {} acquired.", dirname);
-	Set<PosixFilePermission> rwall = 
-	    EnumSet.of(PosixFilePermission.OWNER_READ, 
-		       PosixFilePermission.OWNER_WRITE, 
-		       PosixFilePermission.GROUP_READ, 
-		       PosixFilePermission.GROUP_WRITE, 
-		       PosixFilePermission.OTHERS_READ, 
-		       PosixFilePermission.OTHERS_WRITE);
-	Files.setPosixFilePermissions(lockf, rwall);
+	Files.setPosixFilePermissions(lockf, allrwPermissions);
     }
 
     public DirLock(Path dir, boolean shared, boolean touchDataset) 
