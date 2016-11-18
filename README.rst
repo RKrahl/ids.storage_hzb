@@ -47,6 +47,28 @@ ids.storage_hzb.main.properties though, see the comments in the file.
 This plugin requires ids.plugin 1.3.1 and ids.server 1.6.0 or greater.
 
 
+Bugs and limitations
+~~~~~~~~~~~~~~~~~~~~
+
++ It is practically impossible to safely remove a lock file from the
+  storage without a race condition.  On the other hand, not deleting
+  lock files, leaving them pile up forever in the main storage is no
+  option either.  We ressort to the following strategy to minimize the
+  risk:
+
+  - Always use non-blocking calls to obtain a lock in main storage,
+    e.g. tryLock() rather then lock().
+  - Lock files are left in the storage during normal activity.  Old
+    lock files are removed in the file visitor regularly called from
+    the Tidier, only after some configurable period of inactivity for
+    the corresponding dataset.
+
+  Note that this is not a bug in this particular implementation, but
+  rather a design flaw in POSIX fcntl() style locks.  The problem is
+  that fcntl() locks are obtained on open file descriptors and there
+  is no way to open and lock a file in one single atomic operation.
+
+
 Release notes
 ~~~~~~~~~~~~~
 
