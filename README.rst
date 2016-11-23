@@ -47,6 +47,15 @@ ids.storage_hzb.main.properties though, see the comments in the file.
 This plugin requires ids.plugin 1.3.1 and ids.server 1.6.0 or greater.
 
 
+Bugs and limitations
+~~~~~~~~~~~~~~~~~~~~
+
++ The file locking in the main storage has some issues: it is not
+  always reliable and not very efficient.  This is due to the lack of
+  support for locking in the current version of ids.server and cannot
+  be fixed in the plugin.
+
+
 Release notes
 ~~~~~~~~~~~~~
 
