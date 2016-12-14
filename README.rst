@@ -59,6 +59,19 @@ Bugs and limitations
 Release notes
 ~~~~~~~~~~~~~
 
+Version 0.3.4 (2016-12-14)
+--------------------------
+
++ Add configuration options to switch file locking on or off (default
+  off).
+
++ Do not remove old lock files.
+
++ ArchiveFileStorage.delete() does not throw an exception if the
+  archive does not exist.  (See also `icatproject/ids.server#61`_.)
+
++ Upgrade to icat.utils 4.15.1.
+
 Version 0.3.3 (2016-06-03)
 --------------------------
 
@@ -126,4 +139,4 @@ permissions and limitations under the License.
 .. _ids.storage_file: https://repo.icatproject.org/site/ids/storage_file/1.3.3/
 .. _installation instructions: https://icatproject.org/installation/component/
 .. _installation instructions for ids.storage_file: https://repo.icatproject.org/site/ids/storage_file/1.3.3/installation.html
-
+.. _icatproject/ids.server#61: https://github.com/icatproject/ids.server/issues/61
