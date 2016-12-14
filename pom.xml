@@ -16,7 +16,7 @@
     <repositories>
         <repository>
             <id>ICAT Repo</id>
-            <url>http://www.icatproject.org/mvn/repo</url>
+            <url>https://repo.icatproject.org/repo</url>
         </repository>
     </repositories>
 
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.utils</artifactId>
-            <version>4.14.0</version>
+            <version>4.15.1</version>
         </dependency>
 
         <dependency>
