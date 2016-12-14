@@ -1,6 +1,7 @@
 package de.helmholtz_berlin.icat.ids.storage;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +45,7 @@ public class MainFileStorage extends FileStorage
 
     private Path baseDir;
     private Map<String, Path> extBaseDirs;
+    private boolean doFileLocking;
 
     public MainFileStorage(File properties) throws IOException {
 	try {
@@ -63,10 +65,29 @@ public class MainFileStorage extends FileStorage
 		    extBaseDirs.put(extDir, dir);
 		}
 	    }
+	    doFileLocking = props.getBoolean("filelock", false);
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
 	logger.info("MainFileStorage initialized");
+    }
+
+    /*
+     * A do-nothing Closeable.
+     */
+    private class DummyCloseable implements Closeable {
+	DummyCloseable() {
+	}
+	public void close() {
+	}
+    }
+
+    private Closeable getDirLock(Path dir, boolean shared) throws IOException {
+	if (doFileLocking) {
+	    return new DirLock(dir, shared);
+	} else {
+	    return new DummyCloseable();
+	}
     }
 
     protected MatchResult checkLocationPrefix(String location) {
@@ -151,7 +172,7 @@ public class MainFileStorage extends FileStorage
 	assertMainLocation(dsInfo.getDsLocation());
 	Path dir = baseDir.resolve(getRelPath(dsInfo));
 	if (Files.exists(dir)) {
-	    try (DirLock lock = new DirLock(dir, false)) {
+	    try (Closeable lock = getDirLock(dir, false)) {
 		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
 		Files.walkFileTree(dir, treeDeleteVisitor);
 	    }
@@ -163,7 +184,7 @@ public class MainFileStorage extends FileStorage
 	throws IOException {
 	Path path = getMainPath(location);
 	Path dir = path.getParent();
-	try (DirLock lock = new DirLock(dir, false)) {
+	try (Closeable lock = getDirLock(dir, false)) {
 	    Files.delete(path);
 	    try {
 		Files.delete(dir);
@@ -191,10 +212,10 @@ public class MainFileStorage extends FileStorage
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	if (checkLocationPrefix(location) != null) {
-	    return Files.newInputStream(getPath(location));
-	} else {
+	if (doFileLocking && checkLocationPrefix(location) == null) {
 	    return new DirLockInputStream(getPath(location));
+	} else {
+	    return Files.newInputStream(getPath(location));
 	}
     }
 
@@ -206,7 +227,7 @@ public class MainFileStorage extends FileStorage
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	Files.createDirectories(path.getParent());
-	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
 	}
 	return location;
@@ -216,7 +237,7 @@ public class MainFileStorage extends FileStorage
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
 	Files.createDirectories(path.getParent());
-	try (DirLock lock = new DirLock(path.getParent(), false)) {
+	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
 	}
     }

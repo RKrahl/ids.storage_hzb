@@ -11,3 +11,6 @@ dir = /srv/ids/storage_file/data/
 # configured in extDir.list.
 !extDir.exta.dir = /srv/ids/storage_file/external-data-a/
 !extDir.extb.dir = /srv/ids/storage_file/b-files/
+
+# Use file locking in Main storage
+!filelock = false

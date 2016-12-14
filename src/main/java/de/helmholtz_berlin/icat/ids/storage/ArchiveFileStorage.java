@@ -31,6 +31,7 @@ public class ArchiveFileStorage extends FileStorage
 	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
     private Path baseDir;
+    private boolean doFileLocking;
 
     public ArchiveFileStorage(File properties) throws IOException {
 	try {
@@ -38,6 +39,7 @@ public class ArchiveFileStorage extends FileStorage
 	    props.loadFromFile(properties.getPath());
 	    baseDir = props.getFile("dir").toPath();
 	    checkDir(baseDir, properties);
+	    doFileLocking = props.getBoolean("filelock", false);
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
@@ -82,13 +84,18 @@ public class ArchiveFileStorage extends FileStorage
 	String location = getRelPath(dsInfo);
 	String inpath = baseDir.resolve(location).toString();
 	try (FileInputStream in = new FileInputStream(inpath)) {
-	    FileChannel inch = in.getChannel();
-	    logger.debug("Try to acquire shared lock on {}.", inpath);
-	    try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
-		logger.debug("Lock on {} acquired.", inpath);
+	    if (doFileLocking) {
+		FileChannel inch = in.getChannel();
+		logger.debug("Try to acquire shared lock on {}.", inpath);
+		try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
+		    logger.debug("Lock on {} acquired.", inpath);
+		    Files.copy(in, path, 
+			       StandardCopyOption.REPLACE_EXISTING);
+		    logger.debug("Release lock on {}.", inpath);
+		}
+	    } else {
 		Files.copy(in, path, 
 			   StandardCopyOption.REPLACE_EXISTING);
-		logger.debug("Release lock on {}.", inpath);
 	    }
 	}
     }
