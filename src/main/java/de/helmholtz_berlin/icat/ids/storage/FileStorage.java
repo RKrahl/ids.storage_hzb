@@ -25,7 +25,7 @@ public abstract class FileStorage {
 
     /*
      * Helper method to delete all parent directories of a path,
-     * assuming the the file or directory with this path has already
+     * assuming the file or directory with this path has already
      * been deleted.  Continue deleting parent directories until
      * either a parent is not a proper subdirectory of baseDir or
      * DirectoryNotEmptyException is thrown, whichever comes first.
