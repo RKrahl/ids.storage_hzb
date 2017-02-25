@@ -177,6 +177,7 @@ public class MainFileStorage extends FileStorage
 		Files.walkFileTree(dir, treeDeleteVisitor);
 	    }
 	}
+	deleteParentDirs(baseDir, dir);
     }
 
     @Override
@@ -191,6 +192,7 @@ public class MainFileStorage extends FileStorage
 	    } catch (DirectoryNotEmptyException e) {
 	    }
 	}
+	deleteParentDirs(baseDir, dir);
     }
 
     @Override
