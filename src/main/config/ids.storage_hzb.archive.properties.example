@@ -1,5 +1,8 @@
 # Directory to hold the zipped datafiles for the Archive storage
 dir = /srv/ids/storage_file/archive/
 
+# Permissions for files and directories create in archive storage
+umask = 0077
+
 # Use file locking in Archive storage
 !filelock = false

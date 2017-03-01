@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 import org.icatproject.ids.plugin.DsInfo;
 
@@ -22,6 +26,8 @@ public abstract class FileStorage {
 	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
+
+    int umask = 0;
 
     /*
      * Helper method to delete all parent directories of a path,
@@ -45,6 +51,51 @@ public abstract class FileStorage {
 	    }
 	} catch (DirectoryNotEmptyException e) {
 	}
+    }
+
+    private static Set<PosixFilePermission> permissionsFromInt(int p) {
+	Set<PosixFilePermission> perms 
+	    = EnumSet.noneOf(PosixFilePermission.class);
+	if ((p & 0400) != 0) {
+	    perms.add(PosixFilePermission.OWNER_READ);
+	}
+	if ((p & 0200) != 0) {
+	    perms.add(PosixFilePermission.OWNER_WRITE);
+	}
+	if ((p & 0100) != 0) {
+	    perms.add(PosixFilePermission.OWNER_EXECUTE);
+	}
+	if ((p & 0040) != 0) {
+	    perms.add(PosixFilePermission.GROUP_READ);
+	}
+	if ((p & 0020) != 0) {
+	    perms.add(PosixFilePermission.GROUP_WRITE);
+	}
+	if ((p & 0010) != 0) {
+	    perms.add(PosixFilePermission.GROUP_EXECUTE);
+	}
+	if ((p & 0004) != 0) {
+	    perms.add(PosixFilePermission.OTHERS_READ);
+	}
+	if ((p & 0002) != 0) {
+	    perms.add(PosixFilePermission.OTHERS_WRITE);
+	}
+	if ((p & 0001) != 0) {
+	    perms.add(PosixFilePermission.OTHERS_EXECUTE);
+	}
+	return perms;
+    }
+
+    public void setUmask(String octalMask) throws NumberFormatException {
+	umask = Integer.parseInt(octalMask, 8);
+    }
+
+    public Set<PosixFilePermission> getDirPermissons() {
+	return permissionsFromInt(0777 & ~umask);
+    }
+
+    public Set<PosixFilePermission> getFilePermissons() {
+	return permissionsFromInt(0666 & ~umask);
     }
 
     protected void checkDir(Path dir, File props) throws IOException {

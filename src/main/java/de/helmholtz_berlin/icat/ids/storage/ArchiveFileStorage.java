@@ -10,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +42,13 @@ public class ArchiveFileStorage extends FileStorage
 	    props.loadFromFile(properties.getPath());
 	    baseDir = props.getFile("dir").toPath();
 	    checkDir(baseDir, properties);
+
+	    try {
+		setUmask(props.getString("umask"));
+	    } catch (NumberFormatException e) {
+		throw new IOException("Invalid umask: " + e.getMessage());
+	    }
+
 	    doFileLocking = props.getBoolean("filelock", false);
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
@@ -69,8 +79,11 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
-	Files.createDirectories(path.getParent());
+	FileAttribute<Set<PosixFilePermission>> dirPerms 
+	    = PosixFilePermissions.asFileAttribute(getDirPermissons());
+	Files.createDirectories(path.getParent(), dirPerms);
 	Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+	Files.setPosixFilePermissions(path, getFilePermissons());
     }
 
     @Override

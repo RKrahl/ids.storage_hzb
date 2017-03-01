@@ -10,6 +10,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,6 +58,12 @@ public class MainFileStorage extends FileStorage
 	    baseDir = props.getFile("dir").toPath();
 	    checkDir(baseDir, properties);
 
+	    try {
+		setUmask(props.getString("umask"));
+	    } catch (NumberFormatException e) {
+		throw new IOException("Invalid umask: " + e.getMessage());
+	    }
+
 	    extBaseDirs = new HashMap<>();
 	    if (props.has("extDir.list")) {
 		String extDirlist = props.getString("extDir.list");
@@ -65,6 +75,7 @@ public class MainFileStorage extends FileStorage
 		    extBaseDirs.put(extDir, dir);
 		}
 	    }
+
 	    doFileLocking = props.getBoolean("filelock", false);
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
@@ -228,9 +239,12 @@ public class MainFileStorage extends FileStorage
 	checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
-	Files.createDirectories(path.getParent());
+	FileAttribute<Set<PosixFilePermission>> dirPerms 
+	    = PosixFilePermissions.asFileAttribute(getDirPermissons());
+	Files.createDirectories(path.getParent(), dirPerms);
 	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
+	    Files.setPosixFilePermissions(path, getFilePermissons());
 	}
 	return location;
     }
@@ -238,9 +252,12 @@ public class MainFileStorage extends FileStorage
     @Override
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
-	Files.createDirectories(path.getParent());
+	FileAttribute<Set<PosixFilePermission>> dirPerms 
+	    = PosixFilePermissions.asFileAttribute(getDirPermissons());
+	Files.createDirectories(path.getParent(), dirPerms);
 	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
+	    Files.setPosixFilePermissions(path, getFilePermissons());
 	}
     }
 
