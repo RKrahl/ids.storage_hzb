@@ -10,9 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +30,6 @@ public class ArchiveFileStorage extends FileStorage
     private final static Logger logger 
 	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
-    private Path baseDir;
     private boolean doFileLocking;
 
     public ArchiveFileStorage(File properties) throws IOException {
@@ -66,7 +62,7 @@ public class ArchiveFileStorage extends FileStorage
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	try {
 	    Files.delete(path);
-	    deleteParentDirs(baseDir, path);
+	    deleteDirectories(path.getParent());
 	} catch (NoSuchFileException e) {
 	}
     }
@@ -79,9 +75,7 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
-	FileAttribute<Set<PosixFilePermission>> dirPerms 
-	    = PosixFilePermissions.asFileAttribute(getDirPermissons());
-	Files.createDirectories(path.getParent(), dirPerms);
+	createDirectories(path.getParent());
 	Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 	Files.setPosixFilePermissions(path, getFilePermissons());
     }

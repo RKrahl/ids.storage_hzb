@@ -27,31 +27,8 @@ public abstract class FileStorage {
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
 
-    int umask = 0;
-
-    /*
-     * Helper method to delete all parent directories of a path,
-     * assuming the file or directory with this path has already
-     * been deleted.  Continue deleting parent directories until
-     * either a parent is not a proper subdirectory of baseDir or
-     * DirectoryNotEmptyException is thrown, whichever comes first.
-     */
-    public static void deleteParentDirs(Path baseDir, Path path) 
-	throws IOException {
-	path = path.getParent();
-	try {
-	    while (true) {
-		Path parent = path.getParent();
-		if (!parent.startsWith(baseDir)) {
-		    // path is not a subdirectory of baseDir
-		    break;
-		}
-		Files.delete(path);
-		path = parent;
-	    }
-	} catch (DirectoryNotEmptyException e) {
-	}
-    }
+    protected Path baseDir = null;
+    protected int umask = 0;
 
     private static Set<PosixFilePermission> permissionsFromInt(int p) {
 	Set<PosixFilePermission> perms 
@@ -139,6 +116,45 @@ public abstract class FileStorage {
 	    + "/" + visitId.replace('/', '_') 
 	    + "/data"
 	    + "/" + dsName;
+    }
+
+    /*
+     * Delete a directory and all its parent directories.  Continue
+     * deleting parent directories until either a parent is not a
+     * proper subdirectory of baseDir or DirectoryNotEmptyException is
+     * thrown, whichever comes first.
+     */
+    protected void deleteDirectories(Path dir) throws IOException {
+	try {
+	    while (true) {
+		Path parent = dir.getParent();
+		if (!parent.startsWith(baseDir)) {
+		    // dir is not a subdirectory of baseDir
+		    break;
+		}
+		Files.delete(dir);
+		dir = parent;
+	    }
+	} catch (DirectoryNotEmptyException e) {
+	}
+    }
+
+    /*
+     * Creates a directory together with all nonexistent parent
+     * directories.  Similar to Files.createDirectories(), but also
+     * set the correct permissions on all the direcories.
+     */
+    protected void createDirectories(Path dir) throws IOException {
+	Files.createDirectories(dir);
+	while (true) {
+	    Path parent = dir.getParent();
+	    if (!parent.startsWith(baseDir)) {
+		// dir is not a subdirectory of baseDir
+		break;
+	    }
+	    Files.setPosixFilePermissions(dir, getDirPermissons());
+	    dir = parent;
+	}
     }
 
 }
