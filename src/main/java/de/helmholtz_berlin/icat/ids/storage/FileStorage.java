@@ -3,6 +3,7 @@ package de.helmholtz_berlin.icat.ids.storage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -146,14 +147,23 @@ public abstract class FileStorage {
      */
     protected void createDirectories(Path dir) throws IOException {
 	Files.createDirectories(dir);
-	while (true) {
-	    Path parent = dir.getParent();
-	    if (!parent.startsWith(baseDir)) {
-		// dir is not a subdirectory of baseDir
-		break;
+	try {
+	    while (true) {
+		Path parent = dir.getParent();
+		if (!parent.startsWith(baseDir)) {
+		    // dir is not a subdirectory of baseDir
+		    break;
+		}
+		Files.setPosixFilePermissions(dir, getDirPermissons());
+		dir = parent;
 	    }
-	    Files.setPosixFilePermissions(dir, getDirPermissons());
-	    dir = parent;
+	} catch (FileSystemException e) {
+	    // it may happen that some of the parent directories did
+	    // already exist and are not owned by the glassfish user.
+	    // In this case, ignore the "operation not permitted
+	    // error" from setPosixFilePermissions(), assuming that
+	    // the permission were already correct for preexisting
+	    // directories.
 	}
     }
 
