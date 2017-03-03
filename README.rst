@@ -59,6 +59,16 @@ Bugs and limitations
 Release notes
 ~~~~~~~~~~~~~
 
+Version 0.3.5 (2017-03-03)
+--------------------------
+
++ Add a configuration option to define the permissions for files and
+  directories created by the plugin in the storage.
+
++ Reenable deleting of parent directories on delete() in
+  MainFileStorage.  Note that this will not work if file locking is
+  enabled.
+
 Version 0.3.4 (2016-12-14)
 --------------------------
 
@@ -119,7 +129,7 @@ Copyright and License
 ~~~~~~~~~~~~~~~~~~~~~
 
 Copyright 2012-2016 The ICAT Collaboration
-Copyright 2015-2016 Helmholtz-Zentrum Berlin für Materialien und Energie GmbH
+Copyright 2015-2017 Helmholtz-Zentrum Berlin für Materialien und Energie GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License"); you
 may not use this file except in compliance with the License.  You may
