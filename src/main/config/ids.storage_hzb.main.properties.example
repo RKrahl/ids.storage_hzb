@@ -1,7 +1,7 @@
 # Directory to hold the datafiles for the Main storage
 dir = /srv/ids/storage_file/data/
 
-# Permissions for files and directories create in main storage
+# Permissions for files and directories created in main storage
 umask = 0077
 
 # List of external read only storage areas (optional).  Space
