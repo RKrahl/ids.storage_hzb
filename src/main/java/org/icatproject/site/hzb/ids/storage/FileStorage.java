@@ -64,23 +64,12 @@ public abstract class FileStorage {
 	return perms;
     }
 
-    public void setUmask(String octalMask) throws NumberFormatException {
-	umask = Integer.parseInt(octalMask, 8);
-    }
-
     public Set<PosixFilePermission> getDirPermissons() {
 	return permissionsFromInt(0777 & ~umask);
     }
 
     public Set<PosixFilePermission> getFilePermissons() {
 	return permissionsFromInt(0666 & ~umask);
-    }
-
-    protected void checkDir(Path dir, File props) throws IOException {
-	if (!Files.isDirectory(dir)) {
-	    throw new IOException(dir + " as specified in " + props 
-				  + " is not a directory");
-	}
     }
 
     protected String checkInvName(String invName) throws IOException {

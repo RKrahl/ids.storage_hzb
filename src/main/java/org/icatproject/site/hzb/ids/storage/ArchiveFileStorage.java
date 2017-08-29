@@ -1,6 +1,5 @@
 package org.icatproject.site.hzb.ids.storage;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,14 +10,13 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.icatproject.ids.plugin.ArchiveStorageInterface;
 import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
-import org.icatproject.utils.CheckedProperties;
-import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,24 +26,14 @@ public class ArchiveFileStorage extends FileStorage
     private final static Logger logger 
 	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
-    private boolean doFileLocking;
+    private boolean doFileLocking = false;
 
-    public ArchiveFileStorage(File properties) throws IOException {
-	try {
-	    CheckedProperties props = new CheckedProperties();
-	    props.loadFromFile(properties.getPath());
-	    baseDir = props.getFile("dir").toPath();
-	    checkDir(baseDir, properties);
-
-	    try {
-		setUmask(props.getString("umask"));
-	    } catch (NumberFormatException e) {
-		throw new IOException("Invalid umask: " + e.getMessage());
-	    }
-
-	    doFileLocking = props.getBoolean("filelock", false);
-	} catch (CheckedPropertyException e) {
-	    throw new IOException("CheckedPropertException " + e.getMessage());
+    public ArchiveFileStorage(Properties properties) throws IOException {
+	CheckedProperties props = new CheckedProperties(properties);
+	baseDir = props.getDirectory("plugin.archive.dir");
+	umask = props.getOctalNumber("plugin.archive.umask");
+	if (props.has("plugin.archive.filelock")) {
+	    doFileLocking = props.getBoolean("plugin.archive.filelock");
 	}
 	logger.info("ArchiveFileStorage initialized");
     }

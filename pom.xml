@@ -1,8 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>org.icatproject.site.hzb</groupId>
     <artifactId>ids.storage_hzb</artifactId>
-    <version>0.3.5</version>
+    <version>0.4.0-SNAPSHOT</version>
     <name>IDS storage_hzb</name>
 
     <description>HZB storage plugin for ICAT Data Service.</description>
@@ -11,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.scm.id>github</project.scm.id>
+        <gitUrl>https://github.com/RKrahl/ids.storage_hzb</gitUrl>
     </properties>
 
     <repositories>
@@ -21,8 +24,15 @@
     </repositories>
 
     <scm>
-        <connection>scm:git:https://github.com/RKrahl/ids.storage_hzb.git</connection>
+        <connection>scm:git:${gitUrl}.git</connection>
     </scm>
+
+    <licenses>
+	<license>
+	    <name>Apache License, Version 2.0</name>
+	    <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+	</license>
+    </licenses>
 
     <organization>
         <name>Helmholtz-Zentrum Berlin f&#252;r Materialien und Energie</name>
@@ -34,7 +44,7 @@
         <dependency>
             <groupId>org.icatproject</groupId>
             <artifactId>icat.utils</artifactId>
-            <version>4.15.1</version>
+            <version>4.16.0</version>
         </dependency>
 
         <dependency>
@@ -72,7 +82,6 @@
                     <artifactSet>
                         <includes>
                             <include>org.icatproject:ids.plugin</include>
-                            <include>org.icatproject:icat.utils</include>
                             <include>org.slf4j:slf4j-api</include>
                             <include>ch.qos.logback:logback-classic</include>
                             <include>ch.qos.logback:logback-core</include>

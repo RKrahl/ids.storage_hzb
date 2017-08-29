@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,8 +25,6 @@ import java.util.regex.Pattern;
 import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
-import org.icatproject.utils.CheckedProperties;
-import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,36 +39,23 @@ public class MainFileStorage extends FileStorage
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
 
     private Map<String, Path> extBaseDirs;
-    private boolean doFileLocking;
+    private boolean doFileLocking = false;
 
-    public MainFileStorage(File properties) throws IOException {
-	try {
-	    CheckedProperties props = new CheckedProperties();
-	    props.loadFromFile(properties.getPath());
-	    baseDir = props.getFile("dir").toPath();
-	    checkDir(baseDir, properties);
-
-	    try {
-		setUmask(props.getString("umask"));
-	    } catch (NumberFormatException e) {
-		throw new IOException("Invalid umask: " + e.getMessage());
+    public MainFileStorage(Properties properties) throws IOException {
+	CheckedProperties props = new CheckedProperties(properties);
+	baseDir = props.getDirectory("plugin.main.dir");
+	umask = props.getOctalNumber("plugin.main.umask");
+	if (props.has("plugin.main.filelock")) {
+	    doFileLocking = props.getBoolean("plugin.main.filelock");
+	}
+	extBaseDirs = new HashMap<>();
+	if (props.has("plugin.main.extDir.list")) {
+	    String extDirlist = props.getString("plugin.main.extDir.list");
+	    String[] extDirs = extDirlist.trim().split("\\s+");
+	    for (String extDir : extDirs) {
+		String propName = "plugin.main.extDir." + extDir + ".dir";
+		extBaseDirs.put(extDir, props.getDirectory(propName));
 	    }
-
-	    extBaseDirs = new HashMap<>();
-	    if (props.has("extDir.list")) {
-		String extDirlist = props.getString("extDir.list");
-		String[] extDirs = extDirlist.trim().split("\\s+");
-		for (String extDir : extDirs) {
-		    String propName = "extDir." + extDir + ".dir";
-		    Path dir = props.getPath(propName);
-		    checkDir(dir, properties);
-		    extBaseDirs.put(extDir, dir);
-		}
-	    }
-
-	    doFileLocking = props.getBoolean("filelock", false);
-	} catch (CheckedPropertyException e) {
-	    throw new IOException("CheckedPropertException " + e.getMessage());
 	}
 	logger.info("MainFileStorage initialized");
     }
