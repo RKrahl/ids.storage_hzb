@@ -1,4 +1,4 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.BufferedInputStream;
 import java.io.Closeable;
@@ -28,10 +28,6 @@ import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.helmholtz_berlin.icat.ids.storage.DirLock;
-import de.helmholtz_berlin.icat.ids.storage.DirLockInputStream;
-import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 
 public class MainFileStorage extends FileStorage 

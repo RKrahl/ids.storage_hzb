@@ -1,4 +1,4 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -13,9 +13,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.helmholtz_berlin.icat.ids.storage.DsInfoImpl;
-import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 

@@ -1,11 +1,9 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import de.helmholtz_berlin.icat.ids.storage.DirLock;
 
 /*********************************************************************
  *

@@ -1,4 +1,4 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,8 +21,6 @@ import org.icatproject.utils.CheckedProperties;
 import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 public class ArchiveFileStorage extends FileStorage 
     implements ArchiveStorageInterface {

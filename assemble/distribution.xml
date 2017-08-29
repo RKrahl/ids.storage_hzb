@@ -34,7 +34,7 @@
             <outputDirectory>ids.storage_hzb</outputDirectory>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <includes>
-                <include>de.helmholtz_berlin.icat:ids.storage_hzb</include>
+                <include>org.icatproject.site.hzb:ids.storage_hzb</include>
             </includes>
         </dependencySet>
 
