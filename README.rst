@@ -56,8 +56,27 @@ Bugs and limitations
   be fixed in the plugin.
 
 
+Compatibility with id.server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++----------------+--------------------+
+| plugin version | ids.server version |
++================+====================+
+| 0.4.0          | 1.8.0              |
+| 0.3.3 - 0.3.5  | 1.6.0 - 1.7.0      |
++----------------+--------------------+
+
+
 Release notes
 ~~~~~~~~~~~~~
+
+Version 0.4.0 (2017-09-04)
+--------------------------
+
++ Merge ids.storage_file 1.4.0.  Adapt to new configuration interface
+  introduced with ids.server 1.8.0.
+
++ Rename package to org.icatproject.site.hzb.ids.storage.
 
 Version 0.3.5 (2017-03-03)
 --------------------------
