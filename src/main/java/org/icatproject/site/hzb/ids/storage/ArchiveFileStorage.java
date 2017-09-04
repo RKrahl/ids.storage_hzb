@@ -17,14 +17,10 @@ import org.icatproject.ids.plugin.ArchiveStorageInterface;
 import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class ArchiveFileStorage extends FileStorage 
     implements ArchiveStorageInterface {
-
-    private final static Logger logger 
-	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
     private boolean doFileLocking = false;
 
@@ -35,7 +31,6 @@ public class ArchiveFileStorage extends FileStorage
 	if (props.has("plugin.archive.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.archive.filelock");
 	}
-	logger.info("ArchiveFileStorage initialized");
     }
 
     @Override
@@ -79,12 +74,9 @@ public class ArchiveFileStorage extends FileStorage
 	try (FileInputStream in = new FileInputStream(inpath)) {
 	    if (doFileLocking) {
 		FileChannel inch = in.getChannel();
-		logger.debug("Try to acquire shared lock on {}.", inpath);
 		try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
-		    logger.debug("Lock on {} acquired.", inpath);
 		    Files.copy(in, path, 
 			       StandardCopyOption.REPLACE_EXISTING);
-		    logger.debug("Release lock on {}.", inpath);
 		}
 	    } else {
 		Files.copy(in, path, 

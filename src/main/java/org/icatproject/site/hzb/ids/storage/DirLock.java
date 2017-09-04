@@ -13,9 +13,6 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /*********************************************************************
  *
@@ -29,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 public class DirLock implements Closeable {
 
-    private final static Logger logger 
-	= LoggerFactory.getLogger(DirLock.class);
     private final static Set<PosixFilePermission> allrwPermissions 
 	    = PosixFilePermissions.fromString("rw-rw-rw-");
 
@@ -42,11 +37,8 @@ public class DirLock implements Closeable {
     private FileLock lock;
 
     private void acquireLock() throws IOException {
-	logger.debug("Try to acquire a {} lock on {}.", 
-		     (shared ? "shared" : "exclusive"), dirname);
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().lock(0L, Long.MAX_VALUE, shared);
-	logger.debug("Lock on {} acquired.", dirname);
 	Files.setPosixFilePermissions(lockf, allrwPermissions);
     }
 
@@ -62,7 +54,6 @@ public class DirLock implements Closeable {
     }
 
     public void release() throws IOException {
-	logger.debug("Release lock on {}.", dirname);
 	lock.release();
 	lf.close();
     }

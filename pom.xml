@@ -53,12 +53,6 @@
             <version>1.3.1</version>
         </dependency>
 
-	<dependency>
-	    <groupId>ch.qos.logback</groupId>
-	    <artifactId>logback-classic</artifactId>
-	    <version>1.1.3</version>
-	</dependency>
-
     </dependencies>
 
     <build>
@@ -82,9 +76,6 @@
                     <artifactSet>
                         <includes>
                             <include>org.icatproject:ids.plugin</include>
-                            <include>org.slf4j:slf4j-api</include>
-                            <include>ch.qos.logback:logback-classic</include>
-                            <include>ch.qos.logback:logback-core</include>
                         </includes>
                     </artifactSet>
                 </configuration>
