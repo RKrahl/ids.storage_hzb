@@ -40,6 +40,9 @@ public class MainFileStorage extends FileStorage
 	CheckedProperties props = new CheckedProperties(properties);
 	baseDir = props.getDirectory("plugin.main.dir");
 	umask = props.getOctalNumber("plugin.main.umask");
+	if (props.has("plugin.main.group")) {
+	    group = props.getGroupPrincipal("plugin.main.group");
+	}
 	if (props.has("plugin.main.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.main.filelock");
 	}
@@ -213,6 +216,9 @@ public class MainFileStorage extends FileStorage
 	createDirectories(path.getParent());
 	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
+	    if (group != null) {
+		Files.setAttribute(path, "posix:group", group);
+	    }
 	    Files.setPosixFilePermissions(path, getFilePermissons());
 	}
 	return location;

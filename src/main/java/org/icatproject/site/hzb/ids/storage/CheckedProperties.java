@@ -1,9 +1,13 @@
 package org.icatproject.site.hzb.ids.storage;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Properties;
 
 
@@ -39,6 +43,13 @@ public class CheckedProperties {
 	    throw new IOException(name + ": " + e.getMessage());
 	}
 	return num;
+    }
+
+    public GroupPrincipal getGroupPrincipal(String name) throws IOException {
+	String group = getString(name);
+	FileSystem fs = FileSystems.getDefault();
+	UserPrincipalLookupService ls = fs.getUserPrincipalLookupService();
+	return ls.lookupPrincipalByGroupName(group);
     }
 
     public Path getDirectory(String name) throws IOException {

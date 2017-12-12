@@ -28,6 +28,9 @@ public class ArchiveFileStorage extends FileStorage
 	CheckedProperties props = new CheckedProperties(properties);
 	baseDir = props.getDirectory("plugin.archive.dir");
 	umask = props.getOctalNumber("plugin.archive.umask");
+	if (props.has("plugin.archive.group")) {
+	    group = props.getGroupPrincipal("plugin.archive.group");
+	}
 	if (props.has("plugin.archive.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.archive.filelock");
 	}
@@ -58,6 +61,9 @@ public class ArchiveFileStorage extends FileStorage
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	createDirectories(path.getParent());
 	Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+	if (group != null) {
+	    Files.setAttribute(path, "posix:group", group);
+	}
 	Files.setPosixFilePermissions(path, getFilePermissons());
     }
 

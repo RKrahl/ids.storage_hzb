@@ -6,6 +6,7 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
@@ -30,6 +31,7 @@ public abstract class FileStorage {
 
     protected Path baseDir = null;
     protected int umask = 0;
+    protected GroupPrincipal group = null;
 
     private static Set<PosixFilePermission> permissionsFromInt(int p) {
 	Set<PosixFilePermission> perms 
@@ -142,6 +144,9 @@ public abstract class FileStorage {
 		if (!parent.startsWith(baseDir)) {
 		    // dir is not a subdirectory of baseDir
 		    break;
+		}
+		if (group != null) {
+		    Files.setAttribute(dir, "posix:group", group);
 		}
 		Files.setPosixFilePermissions(dir, getDirPermissons());
 		dir = parent;
