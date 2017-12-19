@@ -1,6 +1,7 @@
 package org.icatproject.site.hzb.ids.storage;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
@@ -21,6 +22,8 @@ import org.icatproject.ids.plugin.MainStorageInterface;
 
 public class ArchiveFileStorage extends FileStorage 
     implements ArchiveStorageInterface {
+
+    private static final int BUFFER_SIZE = 65536;
 
     private boolean doFileLocking = false;
 
@@ -60,7 +63,20 @@ public class ArchiveFileStorage extends FileStorage
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	createDirectories(path.getParent());
-	Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+	if (doFileLocking) {
+	    try (FileOutputStream out = new FileOutputStream(path.toString())) {
+		FileChannel ch = out.getChannel();
+		try (FileLock lock = ch.lock()) {
+		    byte[] buffer = new byte[BUFFER_SIZE];
+		    int len;
+		    while ((len = inputStream.read(buffer)) > -1) {
+			out.write(buffer, 0, len);
+		    }
+		}
+	    }
+	} else {
+	    Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+	}
 	if (group != null) {
 	    Files.setAttribute(path, "posix:group", group);
 	}
