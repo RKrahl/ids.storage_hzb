@@ -10,17 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
-import org.icatproject.ids.plugin.ArchiveStorageInterface;
-import org.icatproject.ids.plugin.DfInfo;
+import org.icatproject.ids.plugin.AbstractArchiveStorage;
 import org.icatproject.ids.plugin.DsInfo;
-import org.icatproject.ids.plugin.MainStorageInterface;
 
 
-public class ArchiveFileStorage implements ArchiveStorageInterface {
+public class ArchiveFileStorage extends AbstractArchiveStorage {
 
     private static final int BUFFER_SIZE = 65536;
 
@@ -59,11 +55,6 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
     }
 
     @Override
-    public void delete(String location) throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.delete())");
-    }
-
-    @Override
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	fileHelper.createDirectories(path.getParent());
@@ -85,12 +76,6 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
     }
 
     @Override
-    public void put(InputStream inputStream, String location) 
-	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.put())");
-    }
-
-    @Override
     public void get(DsInfo dsInfo, Path path) throws IOException {
 	String location = getRelPath(dsInfo);
 	String inpath = baseDir.resolve(location).toString();
@@ -106,13 +91,6 @@ public class ArchiveFileStorage implements ArchiveStorageInterface {
 			   StandardCopyOption.REPLACE_EXISTING);
 	    }
 	}
-    }
-
-    @Override
-    public Set<DfInfo> restore(MainStorageInterface mainStorageInterface, 
-			       List<DfInfo> dfInfos)
-	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (ArchiveFileStorage.restore())");
     }
 
 }

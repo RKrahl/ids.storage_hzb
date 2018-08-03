@@ -2,18 +2,14 @@ package org.icatproject.site.hzb.ids.storage;
 
 import java.io.BufferedInputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +18,11 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.icatproject.ids.plugin.DfInfo;
+import org.icatproject.ids.plugin.AbstractMainStorage;
 import org.icatproject.ids.plugin.DsInfo;
-import org.icatproject.ids.plugin.MainStorageInterface;
 
 
-public class MainFileStorage implements MainStorageInterface {
+public class MainFileStorage extends AbstractMainStorage {
 
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
@@ -238,13 +233,6 @@ public class MainFileStorage implements MainStorageInterface {
 	    Files.copy(new BufferedInputStream(is), path);
 	    fileHelper.setFilePermissions(path);
 	}
-    }
-
-    @Override
-    public List<DfInfo> getDatafilesToArchive(long lowArchivingLevel, 
-					      long highArchivingLevel)
-	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (MainFileStorage.getDatafilesToArchive())");
     }
 
     @Override
