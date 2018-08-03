@@ -27,8 +27,7 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 
 
-public class MainFileStorage extends FileStorage 
-    implements MainStorageInterface {
+public class MainFileStorage implements MainStorageInterface {
 
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
@@ -101,6 +100,10 @@ public class MainFileStorage extends FileStorage
 	}
     }
 
+    private String getRelPath(DsInfo dsInfo) throws IOException {
+	return StoragePath.getRelPath(dsInfo);
+    }
+
     /**
      * Get a Path from a location.
      *
@@ -128,7 +131,7 @@ public class MainFileStorage extends FileStorage
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
 	    throw new IOException("invalid location " + location);
 	}
-	checkName(path.getFileName().toString());
+	StoragePath.checkName(path.getFileName().toString());
 	return path;
     }
 
@@ -148,7 +151,7 @@ public class MainFileStorage extends FileStorage
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
 	    throw new IOException("invalid location " + location);
 	}
-	checkName(path.getFileName().toString());
+	StoragePath.checkName(path.getFileName().toString());
 	return path;
     }
 
@@ -216,7 +219,7 @@ public class MainFileStorage extends FileStorage
     public String put(DsInfo dsInfo, String name, InputStream is) 
 	throws IOException {
 	assertMainLocation(dsInfo.getDsLocation());
-	checkName(name);
+	StoragePath.checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	fileHelper.createDirectories(path.getParent());

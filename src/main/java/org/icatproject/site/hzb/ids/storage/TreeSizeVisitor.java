@@ -42,12 +42,12 @@ public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 	Path relPath = baseDir.relativize(dir);
 	int numPathEle = relPath.getNameCount();
 
-	if (numPathEle < FileStorage.dsRelPathNameCount) {
+	if (numPathEle < StoragePath.dsRelPathNameCount) {
 
 	    // ignore directory levels above dataset dirs.
 	    return FileVisitResult.CONTINUE;
 
-	} else if (numPathEle == FileStorage.dsRelPathNameCount) {
+	} else if (numPathEle == StoragePath.dsRelPathNameCount) {
 
 	    DsInfoImpl dsInfo = new DsInfoImpl(relPath);
 	    dsInfo.addSize(attrs.size());
@@ -71,7 +71,7 @@ public class TreeSizeVisitor extends SimpleFileVisitor<Path> {
 	Path relPath = baseDir.relativize(file);
 	int numPathEle = relPath.getNameCount();
 
-	if (numPathEle <= FileStorage.dsRelPathNameCount) {
+	if (numPathEle <= StoragePath.dsRelPathNameCount) {
 
 	    // ignore directory levels above dataset dirs.
 	    return FileVisitResult.CONTINUE;

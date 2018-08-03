@@ -20,8 +20,7 @@ import org.icatproject.ids.plugin.DsInfo;
 import org.icatproject.ids.plugin.MainStorageInterface;
 
 
-public class ArchiveFileStorage extends FileStorage 
-    implements ArchiveStorageInterface {
+public class ArchiveFileStorage implements ArchiveStorageInterface {
 
     private static final int BUFFER_SIZE = 65536;
 
@@ -45,9 +44,8 @@ public class ArchiveFileStorage extends FileStorage
 	}
     }
 
-    @Override
-    protected String getRelPath(DsInfo dsInfo) throws IOException {
-	return super.getRelPath(dsInfo) + ".zip";
+    private String getRelPath(DsInfo dsInfo) throws IOException {
+	return StoragePath.getRelPath(dsInfo) + ".zip";
     }
 
     @Override

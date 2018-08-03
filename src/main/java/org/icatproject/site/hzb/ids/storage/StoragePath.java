@@ -4,10 +4,19 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.icatproject.ids.plugin.DsInfo;
 
-public abstract class FileStorage {
+/*
+ * A collection of static helper functions to check file names and to
+ * calculate the relative paths of datasets in the storage.
+ *
+ * Note: the functions throw IOException on error although
+ * IllegalArgumentException would be more appropriate.  But
+ * IOException is what MainFileStorage and ArchiveFileStorage are
+ * supposed to throw on error and so it's more convenient to avoid the
+ * need to translate the exception by the caller.
+ */
+public class StoragePath {
 
     // Number of name elements in the relative path down to dataset
     // level.  Must be in sync with the return value of getRelPath().
@@ -20,7 +29,7 @@ public abstract class FileStorage {
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
 
-    protected String checkInvName(String invName) throws IOException {
+    private static String checkInvName(String invName) throws IOException {
 	Matcher m = invNameRegExp.matcher(invName);
 	if (!m.matches()) {
 	    throw new IOException("invalid invesigation name " + invName);
@@ -28,19 +37,19 @@ public abstract class FileStorage {
 	return m.group(1);
     }
 
-    protected void checkVisitId(String visitId) throws IOException {
+    private static void checkVisitId(String visitId) throws IOException {
 	if (!visitIdRegExp.matcher(visitId).matches()) {
 	    throw new IOException("invalid visit id " + visitId);
 	}
     }
 
-    protected void checkName(String name) throws IOException {
+    public static void checkName(String name) throws IOException {
 	if (!nameRegExp.matcher(name).matches()) {
 	    throw new IOException("invalid name " + name);
 	}
     }
 
-    protected String getRelPath(DsInfo dsInfo) throws IOException {
+    public static String getRelPath(DsInfo dsInfo) throws IOException {
 	String facilityName = dsInfo.getFacilityName();
 	String invName = dsInfo.getInvName();
 	String visitId = dsInfo.getVisitId();
