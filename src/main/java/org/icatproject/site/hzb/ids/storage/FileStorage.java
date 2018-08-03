@@ -1,15 +1,6 @@
 package org.icatproject.site.hzb.ids.storage;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileSystemException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.GroupPrincipal;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.EnumSet;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,51 +19,6 @@ public abstract class FileStorage {
 	= Pattern.compile("\\d+\\.\\d+-[A-Z]+(?:/[A-Z]+)?");
     public static final Pattern nameRegExp 
 	= Pattern.compile("[0-9A-Za-z][0-9A-Za-z~._+-]*");
-
-    protected Path baseDir = null;
-    protected int umask = 0;
-    protected GroupPrincipal group = null;
-
-    private static Set<PosixFilePermission> permissionsFromInt(int p) {
-	Set<PosixFilePermission> perms 
-	    = EnumSet.noneOf(PosixFilePermission.class);
-	if ((p & 0400) != 0) {
-	    perms.add(PosixFilePermission.OWNER_READ);
-	}
-	if ((p & 0200) != 0) {
-	    perms.add(PosixFilePermission.OWNER_WRITE);
-	}
-	if ((p & 0100) != 0) {
-	    perms.add(PosixFilePermission.OWNER_EXECUTE);
-	}
-	if ((p & 0040) != 0) {
-	    perms.add(PosixFilePermission.GROUP_READ);
-	}
-	if ((p & 0020) != 0) {
-	    perms.add(PosixFilePermission.GROUP_WRITE);
-	}
-	if ((p & 0010) != 0) {
-	    perms.add(PosixFilePermission.GROUP_EXECUTE);
-	}
-	if ((p & 0004) != 0) {
-	    perms.add(PosixFilePermission.OTHERS_READ);
-	}
-	if ((p & 0002) != 0) {
-	    perms.add(PosixFilePermission.OTHERS_WRITE);
-	}
-	if ((p & 0001) != 0) {
-	    perms.add(PosixFilePermission.OTHERS_EXECUTE);
-	}
-	return perms;
-    }
-
-    public Set<PosixFilePermission> getDirPermissons() {
-	return permissionsFromInt(0777 & ~umask);
-    }
-
-    public Set<PosixFilePermission> getFilePermissons() {
-	return permissionsFromInt(0666 & ~umask);
-    }
 
     protected String checkInvName(String invName) throws IOException {
 	Matcher m = invNameRegExp.matcher(invName);
@@ -108,57 +54,6 @@ public abstract class FileStorage {
 	    + "/" + visitId.replace('/', '_') 
 	    + "/data"
 	    + "/" + dsName;
-    }
-
-    /*
-     * Delete a directory and all its parent directories.  Continue
-     * deleting parent directories until either a parent is not a
-     * proper subdirectory of baseDir or DirectoryNotEmptyException is
-     * thrown, whichever comes first.
-     */
-    protected void deleteDirectories(Path dir) throws IOException {
-	try {
-	    while (true) {
-		Path parent = dir.getParent();
-		if (!parent.startsWith(baseDir)) {
-		    // dir is not a subdirectory of baseDir
-		    break;
-		}
-		Files.delete(dir);
-		dir = parent;
-	    }
-	} catch (DirectoryNotEmptyException e) {
-	}
-    }
-
-    /*
-     * Creates a directory together with all nonexistent parent
-     * directories.  Similar to Files.createDirectories(), but also
-     * set the correct permissions on all the direcories.
-     */
-    protected void createDirectories(Path dir) throws IOException {
-	Files.createDirectories(dir);
-	try {
-	    while (true) {
-		Path parent = dir.getParent();
-		if (!parent.startsWith(baseDir)) {
-		    // dir is not a subdirectory of baseDir
-		    break;
-		}
-		if (group != null) {
-		    Files.setAttribute(dir, "posix:group", group);
-		}
-		Files.setPosixFilePermissions(dir, getDirPermissons());
-		dir = parent;
-	    }
-	} catch (FileSystemException e) {
-	    // it may happen that some of the parent directories did
-	    // already exist and are not owned by the glassfish user.
-	    // In this case, ignore the "operation not permitted
-	    // error" from setPosixFilePermissions(), assuming that
-	    // the permission were already correct for preexisting
-	    // directories.
-	}
     }
 
 }

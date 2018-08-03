@@ -33,16 +33,22 @@ public class MainFileStorage extends FileStorage
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
 
+    private Path baseDir;
+    private FileHelper fileHelper;
     private Map<String, Path> extBaseDirs;
     private boolean doFileLocking = false;
 
     public MainFileStorage(Properties properties) throws IOException {
 	CheckedProperties props = new CheckedProperties(properties);
 	baseDir = props.getDirectory("plugin.main.dir");
-	umask = props.getOctalNumber("plugin.main.umask");
+	int umask = props.getOctalNumber("plugin.main.umask");
+	String group;
 	if (props.has("plugin.main.group")) {
-	    group = props.getGroupPrincipal("plugin.main.group");
+	    group = props.getString("plugin.main.group");
+	} else {
+	    group = null;
 	}
+	fileHelper = new FileHelper(baseDir, umask, group);
 	if (props.has("plugin.main.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.main.filelock");
 	}
@@ -162,7 +168,7 @@ public class MainFileStorage extends FileStorage
 		Files.walkFileTree(dir, treeDeleteVisitor);
 	    }
 	}
-	deleteDirectories(dir.getParent());
+	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
@@ -177,7 +183,7 @@ public class MainFileStorage extends FileStorage
 	    } catch (DirectoryNotEmptyException e) {
 	    }
 	}
-	deleteDirectories(dir.getParent());
+	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
@@ -213,13 +219,10 @@ public class MainFileStorage extends FileStorage
 	checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
-	createDirectories(path.getParent());
+	fileHelper.createDirectories(path.getParent());
 	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
-	    if (group != null) {
-		Files.setAttribute(path, "posix:group", group);
-	    }
-	    Files.setPosixFilePermissions(path, getFilePermissons());
+	    fileHelper.setFilePermissions(path);
 	}
 	return location;
     }
@@ -227,10 +230,10 @@ public class MainFileStorage extends FileStorage
     @Override
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
-	createDirectories(path.getParent());
+	fileHelper.createDirectories(path.getParent());
 	try (Closeable lock = getDirLock(path.getParent(), false)) {
 	    Files.copy(new BufferedInputStream(is), path);
-	    Files.setPosixFilePermissions(path, getFilePermissons());
+	    fileHelper.setFilePermissions(path);
 	}
     }
 

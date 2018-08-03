@@ -25,15 +25,21 @@ public class ArchiveFileStorage extends FileStorage
 
     private static final int BUFFER_SIZE = 65536;
 
+    private Path baseDir;
+    private FileHelper fileHelper;
     private boolean doFileLocking = false;
 
     public ArchiveFileStorage(Properties properties) throws IOException {
 	CheckedProperties props = new CheckedProperties(properties);
 	baseDir = props.getDirectory("plugin.archive.dir");
-	umask = props.getOctalNumber("plugin.archive.umask");
+	int umask = props.getOctalNumber("plugin.archive.umask");
+	String group;
 	if (props.has("plugin.archive.group")) {
-	    group = props.getGroupPrincipal("plugin.archive.group");
+	    group = props.getString("plugin.archive.group");
+	} else {
+	    group = null;
 	}
+	fileHelper = new FileHelper(baseDir, umask, group);
 	if (props.has("plugin.archive.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.archive.filelock");
 	}
@@ -49,7 +55,7 @@ public class ArchiveFileStorage extends FileStorage
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	try {
 	    Files.delete(path);
-	    deleteDirectories(path.getParent());
+	    fileHelper.deleteDirectories(path.getParent());
 	} catch (NoSuchFileException e) {
 	}
     }
@@ -62,7 +68,7 @@ public class ArchiveFileStorage extends FileStorage
     @Override
     public void put(DsInfo dsInfo, InputStream inputStream) throws IOException {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
-	createDirectories(path.getParent());
+	fileHelper.createDirectories(path.getParent());
 	if (doFileLocking) {
 	    try (FileOutputStream out = new FileOutputStream(path.toString())) {
 		FileChannel ch = out.getChannel();
@@ -77,10 +83,7 @@ public class ArchiveFileStorage extends FileStorage
 	} else {
 	    Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 	}
-	if (group != null) {
-	    Files.setAttribute(path, "posix:group", group);
-	}
-	Files.setPosixFilePermissions(path, getFilePermissons());
+	fileHelper.setFilePermissions(path);
     }
 
     @Override
