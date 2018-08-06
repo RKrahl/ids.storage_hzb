@@ -21,16 +21,16 @@ public class DsInfoImpl implements DsInfo {
     /**
      * Initialize the DsInfoImpl from a relative path in the storage.
      * This is in a sense the invers of
-     * FileStorage.getRelPath(DsInfo).
+     * StoragePath.getRelPath(DsInfo).
      * 
      * The relative paths are of the form
-     * facility/cycle/invName/visitId/data/dsName
+     * nameSpace/cycle/proposalno/data/dsName
      */
     public DsInfoImpl(Path relPath) throws IllegalArgumentException {
-	this.facilityName = relPath.getName(0).toString();;
-	this.invName = relPath.getName(2).toString();
-	this.visitId = relPath.getName(3).toString();
-	this.dsName = relPath.getName(5).toString();
+	String nameSpace = relPath.getName(0).toString();
+	String propNo = relPath.getName(2).toString();
+	this.invName = nameSpace + ":" + propNo.replace('_', '/');
+	this.dsName = relPath.getName(4).toString();
 	this.size = 0;
 	this.lastModifiedTime = FileTime.fromMillis(0);
     }
