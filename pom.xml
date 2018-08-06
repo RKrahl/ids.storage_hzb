@@ -3,7 +3,7 @@
 
     <groupId>org.icatproject.site.hzb</groupId>
     <artifactId>ids.storage_hzb</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
     <name>IDS storage_hzb</name>
 
     <description>HZB storage plugin for ICAT Data Service.</description>
