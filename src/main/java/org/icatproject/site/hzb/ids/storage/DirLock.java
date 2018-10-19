@@ -1,4 +1,4 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -14,9 +14,6 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.icatproject.ids.plugin.AlreadyLockedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /*********************************************************************
  *
@@ -30,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 public class DirLock implements Closeable {
 
-    private final static Logger logger 
-	= LoggerFactory.getLogger(DirLock.class);
     private final static Set<PosixFilePermission> allrwPermissions 
 	    = PosixFilePermissions.fromString("rw-rw-rw-");
 
@@ -43,15 +38,12 @@ public class DirLock implements Closeable {
     private FileLock lock;
 
     private void acquireLock() throws AlreadyLockedException, IOException {
-	logger.debug("Try to acquire a {} lock on {}.", 
-		     (shared ? "shared" : "exclusive"), dirname);
 	Files.createDirectories(lockf.getParent());
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().tryLock(0L, Long.MAX_VALUE, shared);
 	if (lock == null) {
 	    throw new AlreadyLockedException();
 	}
-	logger.debug("Lock on {} acquired.", dirname);
 	Files.setPosixFilePermissions(lockf, allrwPermissions);
     }
 
@@ -73,7 +65,6 @@ public class DirLock implements Closeable {
     }
 
     public void release() throws IOException {
-	logger.debug("Release lock on {}.", dirname);
 	lock.release();
 	lf.close();
     }

@@ -13,10 +13,14 @@ Features
 + Customized, meaningful file names in the storage.  The file name
   layout is::
 
-    <storage-root>/<facility-name>/<prefix>/<inv-name>/<visit-id>/data/<dataset-name>/<datafile-name>
+    <storage-root>/<name-space>/<cycle>/<inv-name>/data/<dataset-name>/<datafile-name>
 
-  where ``<prefix>`` corresponds to the facility cycle and is derived
-  from the investigation name ``<inv-name>``.
+  where ``<name-space>`` is a name space prefix and ``<cycle>``
+  corresponds to the facility cycle, both are derived from the
+  investigation name ``<inv-name>``.
+
++ Configurable permissions and posix group for files created in the
+  storage.
 
 + External storage areas: a prefix on the location of Datasets and
   Datafiles determines whether it is to be searched in an external
@@ -44,7 +48,21 @@ instructions for ids.storage_file`_.
 There are a few additional configuration options in
 ids.storage_hzb.main.properties though, see the comments in the file.
 
-This plugin requires ids.plugin 1.3.1 and ids.server 1.6.0 or greater.
+This plugin requires ids.plugin 1.4.0 and ids.server 1.9.0 or greater.
+
+
+Compatibility with ids.server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++----------------+--------------------+
+| plugin version | ids.server version |
++================+====================+
+| 0.5.0          | 1.9.0              |
++----------------+--------------------+
+| 0.4.0          | 1.8.0              |
++----------------+--------------------+
+| 0.3.3 - 0.3.5  | 1.6.0 - 1.7.0      |
++----------------+--------------------+
 
 
 Bugs and limitations
@@ -62,6 +80,53 @@ Bugs and limitations
 
 Release notes
 ~~~~~~~~~~~~~
+
+Version 0.5.0 (2018-08-06)
+--------------------------
+
++ Adapt storage path to new style proposal numbers.
+
++ Drop facility name and visit id from the zipper name.
+
++ Add a configuration option to define the group for files and
+  directories created by the plugin in the storage.
+
++ Implement file locking in ArchiveFileStorage also for put().
+
++ Merge ids.storage_file 1.4.1.  Derive the storage classes from the
+  new abstract classes defined in the plugin.  Require ids.plugin
+  1.4.0.
+
+Version 0.4.0 (2017-09-04)
+--------------------------
+
++ Merge ids.storage_file 1.4.0.  Adapt to new configuration interface
+  introduced with ids.server 1.8.0.
+
++ Rename package to org.icatproject.site.hzb.ids.storage.
+
+Version 0.3.5 (2017-03-03)
+--------------------------
+
++ Add a configuration option to define the permissions for files and
+  directories created by the plugin in the storage.
+
++ Reenable deleting of parent directories on delete() in
+  MainFileStorage.  Note that this will not work if file locking is
+  enabled.
+
+Version 0.3.4 (2016-12-14)
+--------------------------
+
++ Add configuration options to switch file locking on or off (default
+  off).
+
++ Do not remove old lock files.
+
++ ArchiveFileStorage.delete() does not throw an exception if the
+  archive does not exist.  (See also `icatproject/ids.server#61`_.)
+
++ Upgrade to icat.utils 4.15.1.
 
 Version 0.3.3 (2016-06-03)
 --------------------------
@@ -109,8 +174,8 @@ derived from ids.storage_file 1.2.0, later ported to 1.3.0.
 Copyright and License
 ~~~~~~~~~~~~~~~~~~~~~
 
-Copyright 2012-2016 The ICAT Collaboration
-Copyright 2015-2016 Helmholtz-Zentrum Berlin für Materialien und Energie GmbH
+Copyright 2012-2018 The ICAT Collaboration
+Copyright 2015-2018 Helmholtz-Zentrum Berlin für Materialien und Energie GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License"); you
 may not use this file except in compliance with the License.  You may
@@ -130,4 +195,4 @@ permissions and limitations under the License.
 .. _ids.storage_file: https://repo.icatproject.org/site/ids/storage_file/1.3.3/
 .. _installation instructions: https://icatproject.org/installation/component/
 .. _installation instructions for ids.storage_file: https://repo.icatproject.org/site/ids/storage_file/1.3.3/installation.html
-
+.. _icatproject/ids.server#61: https://github.com/icatproject/ids.server/issues/61

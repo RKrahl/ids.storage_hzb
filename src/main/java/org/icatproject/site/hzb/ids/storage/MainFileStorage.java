@@ -1,72 +1,61 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.BufferedInputStream;
-import java.io.File;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.icatproject.ids.plugin.AbstractMainStorage;
 import org.icatproject.ids.plugin.AlreadyLockedException;
-import org.icatproject.ids.plugin.DfInfo;
 import org.icatproject.ids.plugin.DsInfo;
-import org.icatproject.ids.plugin.MainStorageInterface;
-import org.icatproject.utils.CheckedProperties;
-import org.icatproject.utils.CheckedProperties.CheckedPropertyException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.helmholtz_berlin.icat.ids.storage.DirLock;
-import de.helmholtz_berlin.icat.ids.storage.FileStorage;
 
 
-public class MainFileStorage extends FileStorage 
-    implements MainStorageInterface {
-
-    private final static Logger logger 
-	= LoggerFactory.getLogger(MainFileStorage.class);
+public class MainFileStorage extends AbstractMainStorage {
 
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
 
     private Path baseDir;
+    private FileHelper fileHelper;
     private Map<String, Path> extBaseDirs;
+    private boolean doFileLocking = false;
 
-    public MainFileStorage(File properties) throws IOException {
-	try {
-	    CheckedProperties props = new CheckedProperties();
-	    props.loadFromFile(properties.getPath());
-	    baseDir = props.getFile("dir").toPath();
-	    checkDir(baseDir, properties);
-
-	    extBaseDirs = new HashMap<>();
-	    if (props.has("extDir.list")) {
-		String extDirlist = props.getString("extDir.list");
-		String[] extDirs = extDirlist.trim().split("\\s+");
-		for (String extDir : extDirs) {
-		    String propName = "extDir." + extDir + ".dir";
-		    Path dir = props.getPath(propName);
-		    checkDir(dir, properties);
-		    extBaseDirs.put(extDir, dir);
-		}
-	    }
-	} catch (CheckedPropertyException e) {
-	    throw new IOException("CheckedPropertException " + e.getMessage());
+    public MainFileStorage(Properties properties) throws IOException {
+	CheckedProperties props = new CheckedProperties(properties);
+	baseDir = props.getDirectory("plugin.main.dir");
+	int umask = props.getOctalNumber("plugin.main.umask");
+	String group;
+	if (props.has("plugin.main.group")) {
+	    group = props.getString("plugin.main.group");
+	} else {
+	    group = null;
 	}
-	logger.info("MainFileStorage initialized");
+	fileHelper = new FileHelper(baseDir, umask, group);
+	if (props.has("plugin.main.filelock")) {
+	    doFileLocking = props.getBoolean("plugin.main.filelock");
+	}
+	extBaseDirs = new HashMap<>();
+	if (props.has("plugin.main.extDir.list")) {
+	    String extDirlist = props.getString("plugin.main.extDir.list");
+	    String[] extDirs = extDirlist.trim().split("\\s+");
+	    for (String extDir : extDirs) {
+		String propName = "plugin.main.extDir." + extDir + ".dir";
+		extBaseDirs.put(extDir, props.getDirectory(propName));
+	    }
+	}
     }
 
     protected MatchResult checkLocationPrefix(String location) {
@@ -87,6 +76,10 @@ public class MainFileStorage extends FileStorage
 	    throw new IOException("write access to external storage area " 
 				  + m.group(1) + " refused");
 	}
+    }
+
+    private String getRelPath(DsInfo dsInfo) throws IOException {
+	return StoragePath.getRelPath(dsInfo);
     }
 
     /**
@@ -116,7 +109,7 @@ public class MainFileStorage extends FileStorage
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
 	    throw new IOException("invalid location " + location);
 	}
-	checkName(path.getFileName().toString());
+	StoragePath.checkName(path.getFileName().toString());
 	return path;
     }
 
@@ -136,7 +129,7 @@ public class MainFileStorage extends FileStorage
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
 	    throw new IOException("invalid location " + location);
 	}
-	checkName(path.getFileName().toString());
+	StoragePath.checkName(path.getFileName().toString());
 	return path;
     }
 
@@ -154,6 +147,7 @@ public class MainFileStorage extends FileStorage
 	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
 	    Files.walkFileTree(dir, treeDeleteVisitor);
 	}
+	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
@@ -166,6 +160,7 @@ public class MainFileStorage extends FileStorage
 	    Files.delete(dir);
 	} catch (DirectoryNotEmptyException e) {
 	}
+	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
@@ -194,26 +189,21 @@ public class MainFileStorage extends FileStorage
     public String put(DsInfo dsInfo, String name, InputStream is) 
 	throws IOException {
 	assertMainLocation(dsInfo.getDsLocation());
-	checkName(name);
+	StoragePath.checkName(name);
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
-	Files.createDirectories(path.getParent());
+	fileHelper.createDirectories(path.getParent());
 	Files.copy(new BufferedInputStream(is), path);
+	fileHelper.setFilePermissions(path);
 	return location;
     }
 
     @Override
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
-	Files.createDirectories(path.getParent());
+	fileHelper.createDirectories(path.getParent());
 	Files.copy(new BufferedInputStream(is), path);
-    }
-
-    @Override
-    public List<DfInfo> getDatafilesToArchive(long lowArchivingLevel, 
-					      long highArchivingLevel)
-	throws IOException {
-	throw new IOException("This plugin does not support StorageUnit \"DATAFILE\" (MainFileStorage.getDatafilesToArchive())");
+	fileHelper.setFilePermissions(path);
     }
 
     @Override
@@ -226,12 +216,9 @@ public class MainFileStorage extends FileStorage
 
 	long size = treeSizeVisitor.getTotalSize();
 	if (size < highArchivingLevel) {
-	    logger.debug("Size {} < highArchivingLevel {} no action.", 
-			 size, highArchivingLevel);
 	    return Collections.emptyList();
 	}
 	long recover = size - lowArchivingLevel;
-	logger.debug("Want to reduce size by {}.", recover);
 
 	List<DsInfo> result = new ArrayList<>();
 	for (DsInfoImpl dsInfo : treeSizeVisitor.getDsInfos()) {
@@ -241,14 +228,17 @@ public class MainFileStorage extends FileStorage
 		break;
 	    }
 	}
-	logger.debug("{} DsInfos returned to reduce size", result.size());
 	return result;
     }
 
     @Override
     public AutoCloseable lock(DsInfo dsInfo, boolean shared)
 	throws AlreadyLockedException, IOException {
-	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
+	if (doFileLocking) {
+	    return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
+	} else {
+	    return null;
+	}
     }
 
 }

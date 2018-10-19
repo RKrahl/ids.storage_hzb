@@ -4,29 +4,13 @@ import os
 
 # ids.storage_hzb
 
-actions, arg, props = getActions("ids.storage_hzb-setup.properties", [])
-
-prop_lists = {}
-prop_lists["ids.storage_hzb.main.properties"] = ["dir"]
-prop_lists["ids.storage_hzb.archive.properties"] = ["dir"]
+actions, arg, props = getActions("setup.properties", [])
 
 
 if arg in ["CONFIGURE", "INSTALL"]:
-    for prop_name, prop_list in prop_lists.items():
-        actions.configure(prop_name, prop_list)
     actions.checkNoErrors()
 
 if arg == "INSTALL":
-        
-    for prop_name, prop_list in prop_lists.items():
-        props = getProperties(prop_name, prop_list)
-        if not actions.configFileExists(props.get("dir")):
-            abort("Please create directory " + props.get("dir") + " relative to the config directory as specified in " + prop_name)
-    
-    for prop_name, prop_list in prop_lists.items():
-        getProperties(prop_name, prop_list)
-        actions.installFile(prop_name)
-   
     try:     
         app = actions.getAppName("ids.server")
         if app: actions.disableApp(app)   
@@ -40,9 +24,6 @@ if arg == "INSTALL":
         abort(str(e))
                 
 if arg == "UNINSTALL":
-    for prop_name in prop_lists:
-        actions.removeFile(prop_name)
-    
     try:
         actions.removeFromApplibs("ids.storage_hzb*.jar")        
     except Exception, e:

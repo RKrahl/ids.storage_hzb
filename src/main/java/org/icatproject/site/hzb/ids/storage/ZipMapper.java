@@ -1,4 +1,4 @@
-package de.helmholtz_berlin.icat.ids.storage;
+package org.icatproject.site.hzb.ids.storage;
 
 import java.io.IOException;
 
@@ -12,9 +12,7 @@ public class ZipMapper implements ZipMapperInterface {
     public String getFullEntryName(DsInfo dsInfo, DfInfo dfInfo) 
 	throws IOException {
 	return "ids/" 
-	    + dsInfo.getFacilityName() + "/"
 	    + dsInfo.getInvName().replace('/', '_') + "/"
-	    + dsInfo.getVisitId().replace('/', '_') + "/"
 	    + dsInfo.getDsName() + "/" 
 	    + dfInfo.getDfName();
     }
@@ -22,7 +20,7 @@ public class ZipMapper implements ZipMapperInterface {
     @Override
     public String getFileName(String fullEntryName) {
 	int l = -1;
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 3; i++) {
 	    l = fullEntryName.indexOf('/', l + 1);
 	}
 	return l >= 0 ? fullEntryName.substring(l + 1) : null;
