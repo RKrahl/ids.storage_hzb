@@ -44,7 +44,6 @@ public class MainFileStorage extends FileStorage
 
     private Path baseDir;
     private Map<String, Path> extBaseDirs;
-    private long oldLockSeconds;
 
     public MainFileStorage(File properties) throws IOException {
 	try {
@@ -63,11 +62,6 @@ public class MainFileStorage extends FileStorage
 		    checkDir(dir, properties);
 		    extBaseDirs.put(extDir, dir);
 		}
-	    }
-	    if (props.has("oldLockSeconds")) {
-		oldLockSeconds = props.getNonNegativeLong("oldLockSeconds");
-	    } else {
-		oldLockSeconds = 0;
 	    }
 	} catch (CheckedPropertyException e) {
 	    throw new IOException("CheckedPropertException " + e.getMessage());
@@ -227,8 +221,7 @@ public class MainFileStorage extends FileStorage
 					     long highArchivingLevel)
 	throws IOException {
 
-	TreeSizeVisitor treeSizeVisitor 
-	    = new TreeSizeVisitor(baseDir, oldLockSeconds);
+	TreeSizeVisitor treeSizeVisitor = new TreeSizeVisitor(baseDir);
 	Files.walkFileTree(baseDir, treeSizeVisitor);
 
 	long size = treeSizeVisitor.getTotalSize();
@@ -255,7 +248,7 @@ public class MainFileStorage extends FileStorage
     @Override
     public AutoCloseable lock(DsInfo dsInfo, boolean shared)
 	throws AlreadyLockedException, IOException {
-	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared, true);
+	return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
     }
 
 }
