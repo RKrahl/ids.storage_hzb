@@ -66,7 +66,7 @@ Compatibility with ids.server
 +----------------+--------------------+
 | plugin version | ids.server version |
 +================+====================+
-| 0.5.0          | 1.9.0              |
+| 0.5.0 - 0.5.1  | 1.9.0 - 1.9.1      |
 +----------------+--------------------+
 | 0.4.0          | 1.8.0              |
 +----------------+--------------------+
@@ -76,6 +76,11 @@ Compatibility with ids.server
 
 Release notes
 ~~~~~~~~~~~~~
+
+Version 0.5.1 (2018-12-18)
+--------------------------
+
++ Allow underscore as first character in file and dataset names.
 
 Version 0.5.0 (2018-08-06)
 --------------------------
