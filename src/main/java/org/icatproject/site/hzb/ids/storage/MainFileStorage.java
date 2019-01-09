@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class MainFileStorage extends AbstractMainStorage {
 	}
     }
 
-    private String getRelPath(DsInfo dsInfo) throws IOException {
+    private String getRelPath(DsInfo dsInfo) throws InvalidPathException {
 	return StoragePath.getRelPath(dsInfo);
     }
 
@@ -106,7 +107,7 @@ public class MainFileStorage extends AbstractMainStorage {
      * relative to the corresponding external storage area directory.
      * Otherwise it is resolved relative to the main storage area.
      */
-    public Path getPath(String location) throws IOException {
+    public Path getPath(String location) throws InvalidPathException {
 	Path base;
 	MatchResult m = checkLocationPrefix(location);
 	if (m == null) {
@@ -118,13 +119,13 @@ public class MainFileStorage extends AbstractMainStorage {
 	    base = extBaseDirs.get(m.group(1));
 	    location = m.group(2);
 	    if (base == null) {
-		throw new IOException("unknown storage area " + m.group(1));
+		throw new InvalidPathException(m.group(1), "unknown storage area");
 	    }
 	}
 	Path localPath = Paths.get(location);
 	Path path = base.resolve(localPath);
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
-	    throw new IOException("invalid location " + location);
+	    throw new InvalidPathException(location, "invalid location");
 	}
 	StoragePath.checkName(path.getFileName().toString());
 	return path;
@@ -139,20 +140,20 @@ public class MainFileStorage extends AbstractMainStorage {
      * of getPath() to resolve a location in a context where write
      * access is needed.
      */
-    public Path getMainPath(String location) throws IOException {
+    public Path getMainPath(String location)
+	throws IOException, InvalidPathException {
 	assertMainLocation(location);
 	Path localPath = Paths.get(location);
 	Path path = baseDir.resolve(localPath);
 	if (localPath.isAbsolute() || ! path.equals(path.normalize())) {
-	    throw new IOException("invalid location " + location);
+	    throw new InvalidPathException(location, "invalid location");
 	}
 	StoragePath.checkName(path.getFileName().toString());
 	return path;
     }
 
     @Override
-    public Path getPath(String location, String createId, String modId) 
-	throws IOException {
+    public Path getPath(String location, String createId, String modId) {
 	return getPath(location);
     }
 
@@ -185,7 +186,7 @@ public class MainFileStorage extends AbstractMainStorage {
     }
 
     @Override
-    public boolean exists(DsInfo dsInfo) throws IOException {
+    public boolean exists(DsInfo dsInfo) {
 	if (checkLocationPrefix(dsInfo.getDsLocation()) != null) {
 	    // Datasets in the external storage areas are assumed to
 	    // be always ONLINE.
@@ -196,7 +197,7 @@ public class MainFileStorage extends AbstractMainStorage {
     }
 
     @Override
-    public boolean exists(String location) throws IOException {
+    public boolean exists(String location) {
 	return Files.exists(getPath(location));
     }
 

@@ -1,6 +1,6 @@
 package org.icatproject.site.hzb.ids.storage;
 
-import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,12 +12,6 @@ import org.icatproject.ids.plugin.DsInfo;
 /*
  * A collection of static helper functions to check file names and to
  * calculate the relative paths of datasets in the storage.
- *
- * Note: the functions throw IOException on error although
- * IllegalArgumentException would be more appropriate.  But
- * IOException is what MainFileStorage and ArchiveFileStorage are
- * supposed to throw on error and so it's more convenient to avoid the
- * need to translate the exception by the caller.
  */
 public class StoragePath {
 
@@ -39,18 +33,18 @@ public class StoragePath {
 	return Collections.unmodifiableMap(m);
     }
     
-    public static void checkName(String name) throws IOException {
+    public static void checkName(String name) throws InvalidPathException {
 	if (!nameRegExp.matcher(name).matches()) {
-	    throw new IOException("invalid name " + name);
+	    throw new InvalidPathException(name, "invalid path element");
 	}
     }
 
-    public static String getRelPath(DsInfo dsInfo) throws IOException {
+    public static String getRelPath(DsInfo dsInfo) throws InvalidPathException {
 	String invName = dsInfo.getInvName();
 	String dsName = dsInfo.getDsName();
 	Matcher im = nameSpaceRegExp.matcher(invName);
         if (!im.matches()) {
-            throw new IOException("invalid invesigation name " + invName);
+            throw new InvalidPathException(invName, "invalid invesigation name");
         }
 	String nameSpace = im.group(1);
 	String propNo = im.group(2);
@@ -58,7 +52,7 @@ public class StoragePath {
 	if (propNoRegExp.containsKey(nameSpace)) {
 	    Matcher pm = propNoRegExp.get(nameSpace).matcher(propNo);
 	    if (!pm.matches()) {
-		throw new IOException("invalid invesigation name " + invName);
+		throw new InvalidPathException(invName, "invalid invesigation name");
 	    }
 	    cycle = pm.group(1);
 	} else {

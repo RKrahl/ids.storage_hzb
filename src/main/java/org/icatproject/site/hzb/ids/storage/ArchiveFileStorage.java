@@ -40,7 +40,7 @@ public class ArchiveFileStorage extends AbstractArchiveStorage {
 	}
     }
 
-    private String getRelPath(DsInfo dsInfo) throws IOException {
+    private String getRelPath(DsInfo dsInfo) {
 	return StoragePath.getRelPath(dsInfo) + ".zip";
     }
 
