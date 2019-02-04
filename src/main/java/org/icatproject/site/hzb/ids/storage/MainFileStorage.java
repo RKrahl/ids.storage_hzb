@@ -19,11 +19,17 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.icatproject.ids.plugin.AbstractMainStorage;
 import org.icatproject.ids.plugin.DsInfo;
 
 
 public class MainFileStorage extends AbstractMainStorage {
+
+    private static final Logger logger
+	= LoggerFactory.getLogger(MainFileStorage.class);
 
     public static final Pattern locationPrefixRegExp 
 	= Pattern.compile("([A-Za-z]+):([0-9A-Za-z./_~+-]+)");
@@ -56,6 +62,7 @@ public class MainFileStorage extends AbstractMainStorage {
 		extBaseDirs.put(extDir, props.getDirectory(propName));
 	    }
 	}
+	logger.info("MainFileStorage initialized");
     }
 
     /*
@@ -246,9 +253,12 @@ public class MainFileStorage extends AbstractMainStorage {
 
 	long size = treeSizeVisitor.getTotalSize();
 	if (size < highArchivingLevel) {
+	    logger.debug("Size {} < highArchivingLevel {} no action.",
+			 size, highArchivingLevel);
 	    return Collections.emptyList();
 	}
 	long recover = size - lowArchivingLevel;
+	logger.debug("Want to reduce size by {}.", recover);
 
 	List<DsInfo> result = new ArrayList<>();
 	for (DsInfoImpl dsInfo : treeSizeVisitor.getDsInfos()) {
@@ -258,6 +268,7 @@ public class MainFileStorage extends AbstractMainStorage {
 		break;
 	    }
 	}
+	logger.debug("{} DsInfos returned to reduce size", result.size());
 	return result;
     }
 

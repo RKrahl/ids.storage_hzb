@@ -12,11 +12,17 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.icatproject.ids.plugin.AbstractArchiveStorage;
 import org.icatproject.ids.plugin.DsInfo;
 
 
 public class ArchiveFileStorage extends AbstractArchiveStorage {
+
+    private static final Logger logger
+	= LoggerFactory.getLogger(ArchiveFileStorage.class);
 
     private static final int BUFFER_SIZE = 65536;
 
@@ -38,6 +44,7 @@ public class ArchiveFileStorage extends AbstractArchiveStorage {
 	if (props.has("plugin.archive.filelock")) {
 	    doFileLocking = props.getBoolean("plugin.archive.filelock");
 	}
+	logger.info("ArchiveFileStorage initialized");
     }
 
     private String getRelPath(DsInfo dsInfo) {
@@ -59,14 +66,18 @@ public class ArchiveFileStorage extends AbstractArchiveStorage {
 	Path path = baseDir.resolve(getRelPath(dsInfo));
 	fileHelper.createDirectories(path.getParent());
 	if (doFileLocking) {
-	    try (FileOutputStream out = new FileOutputStream(path.toString())) {
+	    String outpath = path.toString();
+	    try (FileOutputStream out = new FileOutputStream(outpath)) {
 		FileChannel ch = out.getChannel();
+		logger.debug("Try to acquire an exclusive lock on {}.",outpath);
 		try (FileLock lock = ch.lock()) {
+		    logger.debug("Lock on {} acquired.", outpath);
 		    byte[] buffer = new byte[BUFFER_SIZE];
 		    int len;
 		    while ((len = inputStream.read(buffer)) > -1) {
 			out.write(buffer, 0, len);
 		    }
+		    logger.debug("Release lock on {}.", outpath);
 		}
 	    }
 	} else {
@@ -82,9 +93,12 @@ public class ArchiveFileStorage extends AbstractArchiveStorage {
 	try (FileInputStream in = new FileInputStream(inpath)) {
 	    if (doFileLocking) {
 		FileChannel inch = in.getChannel();
+		logger.debug("Try to acquire a share lock on {}.", inpath);
 		try (FileLock lock = inch.lock(0L, Long.MAX_VALUE, true)) {
+		    logger.debug("Lock on {} acquired.", inpath);
 		    Files.copy(in, path, 
 			       StandardCopyOption.REPLACE_EXISTING);
+		    logger.debug("Release lock on {}.", inpath);
 		}
 	    } else {
 		Files.copy(in, path, 
