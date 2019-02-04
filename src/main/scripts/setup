@@ -1,17 +1,47 @@
 #!/usr/bin/env python
-from setup_utils import *
+import glob
 import os
+import shutil
+import tempfile
+import zipfile
+from setup_utils import *
 
 # ids.storage_hzb
 
 actions, arg, props = getActions("setup.properties", [])
+
+def addtojar(files):
+    jarfiles = glob.glob("*.jar")
+    if len(jarfiles) != 1:
+        abort("Exactly one jar file must be present")
+    # Need to copy the jar file to a new zip, omitting the dest
+    # entries if present, in order to replace them.
+    destnames = { d for (s, d) in files }
+    tmpjar = tempfile.NamedTemporaryFile(mode='wb', dir='.', delete=False)
+    with zipfile.ZipFile(jarfiles[0], mode='r') as injar:  
+        with zipfile.ZipFile(tmpjar, mode='w') as outjar:
+            for zi in injar.infolist():
+                if zi.filename in destnames:
+                    continue
+                outjar.writestr(zi, injar.read(zi))
+            for src, dest in files:
+                outjar.write(src, arcname=dest)
+    shutil.copystat(jarfiles[0], tmpjar.name)
+    os.unlink(jarfiles[0])
+    os.rename(tmpjar.name, jarfiles[0])
 
 
 if arg in ["CONFIGURE", "INSTALL"]:
     actions.checkNoErrors()
 
 if arg == "INSTALL":
-    try:     
+    try:
+        if not os.path.exists("logback.xml"):
+            shutil.copy("logback.xml.example", "logback.xml")
+            abort("\nCopied logback.xml.example to logback.xml\n"
+                  "Please edit logback.xml to meet your requirements\n"
+                  "... and then re-run the command")
+        addtojar([("logback.xml", "logback.xml")])
         app = actions.getAppName("ids.server")
         if app: actions.disableApp(app)   
         actions.removeFromApplibs("ids.storage_hzb*.jar")    
@@ -28,6 +58,3 @@ if arg == "UNINSTALL":
         actions.removeFromApplibs("ids.storage_hzb*.jar")        
     except Exception, e:
         abort(str(e))       
-    
-            
-    
