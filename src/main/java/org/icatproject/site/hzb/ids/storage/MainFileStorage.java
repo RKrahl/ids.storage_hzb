@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -151,11 +152,14 @@ public class MainFileStorage extends AbstractMainStorage {
     public void delete(DsInfo dsInfo) throws IOException {
 	assertMainLocation(dsInfo.getDsLocation());
 	Path dir = baseDir.resolve(getRelPath(dsInfo));
-	if (Files.exists(dir)) {
-	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
-	    Files.walkFileTree(dir, treeDeleteVisitor);
+	try {
+	    if (Files.exists(dir)) {
+		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
+		Files.walkFileTree(dir, treeDeleteVisitor);
+	    }
+	    fileHelper.deleteDirectories(dir.getParent());
+	} catch (NoSuchFileException e) {
 	}
-	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
@@ -163,12 +167,12 @@ public class MainFileStorage extends AbstractMainStorage {
 	throws IOException {
 	Path path = getMainPath(location);
 	Path dir = path.getParent();
-	Files.delete(path);
 	try {
+	    Files.delete(path);
 	    Files.delete(dir);
-	} catch (DirectoryNotEmptyException e) {
+	    fileHelper.deleteDirectories(dir.getParent());
+	} catch (DirectoryNotEmptyException | NoSuchFileException e) {
 	}
-	fileHelper.deleteDirectories(dir.getParent());
     }
 
     @Override
