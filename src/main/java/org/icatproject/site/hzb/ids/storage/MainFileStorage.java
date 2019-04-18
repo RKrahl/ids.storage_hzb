@@ -235,7 +235,9 @@ public class MainFileStorage extends AbstractMainStorage {
     public AutoCloseable lock(DsInfo dsInfo, boolean shared)
 	throws AlreadyLockedException, IOException {
 	if (doFileLocking) {
-	    return new DirLock(baseDir.resolve(getRelPath(dsInfo)), shared);
+	    Path dir = baseDir.resolve(getRelPath(dsInfo));
+	    fileHelper.createDirectories(dir.getParent());
+	    return new DirLock(dir, shared);
 	} else {
 	    return null;
 	}

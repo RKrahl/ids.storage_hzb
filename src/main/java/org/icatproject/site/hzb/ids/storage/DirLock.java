@@ -38,7 +38,6 @@ public class DirLock implements Closeable {
     private FileLock lock;
 
     private void acquireLock() throws AlreadyLockedException, IOException {
-	Files.createDirectories(lockf.getParent());
 	lf = new RandomAccessFile(lockf.toFile(), "rw");
 	lock = lf.getChannel().tryLock(0L, Long.MAX_VALUE, shared);
 	if (lock == null) {
