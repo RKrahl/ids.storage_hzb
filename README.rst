@@ -51,15 +51,6 @@ ids.storage_hzb.main.properties though, see the comments in the file.
 This plugin requires ids.plugin 1.4.0 and ids.server 1.9.0 or greater.
 
 
-Bugs and limitations
-~~~~~~~~~~~~~~~~~~~~
-
-+ The file locking in the main storage has some issues: it is not
-  always reliable and not very efficient.  This is due to the lack of
-  support for locking in the current version of ids.server and cannot
-  be fixed in the plugin.
-
-
 Compatibility with ids.server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -72,6 +63,19 @@ Compatibility with ids.server
 +----------------+--------------------+
 | 0.3.3 - 0.3.5  | 1.6.0 - 1.7.0      |
 +----------------+--------------------+
+
+
+Bugs and limitations
+~~~~~~~~~~~~~~~~~~~~
+
++ It is impossible to safely remove a lock file from the storage
+  without a race condition.  For this reason, this plugin does not
+  remove the lock files at all, but rather leaves this to an external
+  tool that tries to minimize the risk.  Note that this is not a bug
+  in this particular implementation, but rather a design flaw in POSIX
+  fcntl() style locks.  The problem is that fcntl() locks are obtained
+  on open file descriptors, but there is no way to open and lock a
+  file in one single atomic operation.
 
 
 Release notes

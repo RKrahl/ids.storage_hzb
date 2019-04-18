@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.icatproject.ids.plugin.AbstractMainStorage;
+import org.icatproject.ids.plugin.AlreadyLockedException;
 import org.icatproject.ids.plugin.DsInfo;
 
 
@@ -63,24 +64,6 @@ public class MainFileStorage extends AbstractMainStorage {
 	    }
 	}
 	logger.info("MainFileStorage initialized");
-    }
-
-    /*
-     * A do-nothing Closeable.
-     */
-    private class DummyCloseable implements Closeable {
-	DummyCloseable() {
-	}
-	public void close() {
-	}
-    }
-
-    private Closeable getDirLock(Path dir, boolean shared) throws IOException {
-	if (doFileLocking) {
-	    return new DirLock(dir, shared);
-	} else {
-	    return new DummyCloseable();
-	}
     }
 
     protected MatchResult checkLocationPrefix(String location) {
@@ -169,10 +152,8 @@ public class MainFileStorage extends AbstractMainStorage {
 	assertMainLocation(dsInfo.getDsLocation());
 	Path dir = baseDir.resolve(getRelPath(dsInfo));
 	if (Files.exists(dir)) {
-	    try (Closeable lock = getDirLock(dir, false)) {
-		TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
-		Files.walkFileTree(dir, treeDeleteVisitor);
-	    }
+	    TreeDeleteVisitor treeDeleteVisitor = new TreeDeleteVisitor();
+	    Files.walkFileTree(dir, treeDeleteVisitor);
 	}
 	fileHelper.deleteDirectories(dir.getParent());
     }
@@ -182,12 +163,10 @@ public class MainFileStorage extends AbstractMainStorage {
 	throws IOException {
 	Path path = getMainPath(location);
 	Path dir = path.getParent();
-	try (Closeable lock = getDirLock(dir, false)) {
-	    Files.delete(path);
-	    try {
-		Files.delete(dir);
-	    } catch (DirectoryNotEmptyException e) {
-	    }
+	Files.delete(path);
+	try {
+	    Files.delete(dir);
+	} catch (DirectoryNotEmptyException e) {
 	}
 	fileHelper.deleteDirectories(dir.getParent());
     }
@@ -211,11 +190,7 @@ public class MainFileStorage extends AbstractMainStorage {
     @Override
     public InputStream get(String location, String createId, String modId) 
 	throws IOException {
-	if (doFileLocking && checkLocationPrefix(location) == null) {
-	    return new DirLockInputStream(getPath(location));
-	} else {
-	    return Files.newInputStream(getPath(location));
-	}
+	return Files.newInputStream(getPath(location));
     }
 
     @Override
@@ -226,10 +201,8 @@ public class MainFileStorage extends AbstractMainStorage {
 	String location = getRelPath(dsInfo) + "/" + name;
 	Path path = baseDir.resolve(location);
 	fileHelper.createDirectories(path.getParent());
-	try (Closeable lock = getDirLock(path.getParent(), false)) {
-	    Files.copy(new BufferedInputStream(is), path);
-	    fileHelper.setFilePermissions(path);
-	}
+	Files.copy(new BufferedInputStream(is), path);
+	fileHelper.setFilePermissions(path);
 	return location;
     }
 
@@ -237,10 +210,8 @@ public class MainFileStorage extends AbstractMainStorage {
     public void put(InputStream is, String location) throws IOException {
 	Path path = getMainPath(location);
 	fileHelper.createDirectories(path.getParent());
-	try (Closeable lock = getDirLock(path.getParent(), false)) {
-	    Files.copy(new BufferedInputStream(is), path);
-	    fileHelper.setFilePermissions(path);
-	}
+	Files.copy(new BufferedInputStream(is), path);
+	fileHelper.setFilePermissions(path);
     }
 
     @Override
@@ -270,6 +241,18 @@ public class MainFileStorage extends AbstractMainStorage {
 	}
 	logger.debug("{} DsInfos returned to reduce size", result.size());
 	return result;
+    }
+
+    @Override
+    public AutoCloseable lock(DsInfo dsInfo, boolean shared)
+	throws AlreadyLockedException, IOException {
+	if (doFileLocking) {
+	    Path dir = baseDir.resolve(getRelPath(dsInfo));
+	    fileHelper.createDirectories(dir.getParent());
+	    return new DirLock(dir, shared);
+	} else {
+	    return null;
+	}
     }
 
 }
