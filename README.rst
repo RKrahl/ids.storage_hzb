@@ -57,6 +57,8 @@ Compatibility with ids.server
 +----------------+--------------------+
 | plugin version | ids.server version |
 +================+====================+
+| 0.6.0          | 1.10.0             |
++----------------+--------------------+
 | 0.5.0 - 0.5.2  | 1.9.0 - 1.9.1      |
 +----------------+--------------------+
 | 0.4.0          | 1.8.0              |
@@ -81,11 +83,26 @@ Bugs and limitations
 Release notes
 ~~~~~~~~~~~~~
 
+Version 0.6.0 (2019-04-26)
+--------------------------
+
++ Base file locking in main storage on the new lock() method
+  introduced with ids.plugin 1.5.0.  As a consequence, file locking
+  will only work with ids.server 1.10 or newer.
+
++ Merge ids.storage_file 1.4.2: delete() methods do not throw an
+  exception if the files to be deleted do not exist.
+
++ Require ids.plugin 1.5.0.
+
++ Add proposal number name spaces 'pub' and 'misc'.
+
 Version 0.5.2 (2019-02-04)
 --------------------------
 
 + Throw InvalidPathException rather then IOException if a file path
   fails sanitation checks.
+
 + Reenable logging.
 
 Version 0.5.1 (2018-12-18)
