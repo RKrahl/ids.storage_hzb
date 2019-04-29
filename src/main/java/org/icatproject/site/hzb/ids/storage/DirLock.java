@@ -51,7 +51,11 @@ public class DirLock implements Closeable {
 	    throw new AlreadyLockedException();
 	}
 	logger.debug("Lock on {} acquired.", dirname);
-	Files.setPosixFilePermissions(lockf, allrwPermissions);
+	try {
+	    // This may fail if the lockfile has been created by another user.
+	    Files.setPosixFilePermissions(lockf, allrwPermissions);
+	} catch (IOException e) {
+	}
     }
 
     public DirLock(Path dir, boolean shared) 
@@ -62,13 +66,18 @@ public class DirLock implements Closeable {
 	this.shared = shared;
 	acquireLock();
 	FileTime now = FileTime.fromMillis(System.currentTimeMillis());
-	if (Files.isDirectory(dir)) {
-	    // Touch the directory to mark it's recently being accessed.
-	    // This will be taken into account in
-	    // MainFileStorage.getDatasetsToArchive()
-	    Files.setLastModifiedTime(dir, now);
+	try {
+	    // This may fail if the directory or the lockfile has been
+	    // created by another user.
+	    if (Files.isDirectory(dir)) {
+		// Touch the directory to mark it's recently being accessed.
+		// This will be taken into account in
+		// MainFileStorage.getDatasetsToArchive()
+		Files.setLastModifiedTime(dir, now);
+	    }
+	    Files.setLastModifiedTime(lockf, now);
+	} catch (IOException e) {
 	}
-	Files.setLastModifiedTime(lockf, now);
     }
 
     public void release() throws IOException {
