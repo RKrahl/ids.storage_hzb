@@ -57,7 +57,7 @@ Compatibility with ids.server
 +----------------+--------------------+
 | plugin version | ids.server version |
 +================+====================+
-| 0.6.0          | 1.10.0             |
+| 0.6.0 - 0.6.1  | 1.10.0             |
 +----------------+--------------------+
 | 0.5.0 - 0.5.2  | 1.9.0 - 1.9.1      |
 +----------------+--------------------+
@@ -82,6 +82,12 @@ Bugs and limitations
 
 Release notes
 ~~~~~~~~~~~~~
+
+Version 0.6.1 (2019-04-30)
+--------------------------
+
++ Bugfix: Should ignore IOException while trying to set permissions or
+  file modification time of the lock file or the directory in DirLock.
 
 Version 0.6.0 (2019-04-26)
 --------------------------
