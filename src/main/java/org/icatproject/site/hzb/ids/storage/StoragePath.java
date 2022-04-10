@@ -28,8 +28,8 @@ public class StoragePath {
 
     private static Map<String, Pattern> createPropNoMap() {
 	Map<String, Pattern> m = new HashMap<String, Pattern>();
-	m.put("gate1", Pattern.compile("(\\d{3})\\d{5}-[A-Z]+(?:/[A-Z]+)?-\\d+\\.\\d+-[A-Z]+(?:/[A-Z]+)?"));
-	m.put("gate2", Pattern.compile("[A-Z]+-(\\d{3})-\\d+-[A-Z]+(?:/[A-Z]+)?(?:-\\d+\\.\\d+)?"));
+	m.put("gate", Pattern.compile("(\\d{3})-\\d{5}-\\d+\\.\\d+-[A-Z]+"));
+	m.put("gate2", Pattern.compile("[A-Z]+-(\\d{2,3})-\\d{5}(?:-\\d+\\.\\d+)?"));
 	m.put("pub", Pattern.compile("(\\d{2})-ND\\d{6}"));
 	m.put("misc", Pattern.compile("(\\d{2})-\\d{6}"));
 	return Collections.unmodifiableMap(m);
