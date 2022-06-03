@@ -24,7 +24,7 @@ public class StoragePath {
     private static final Map<String, Pattern> propNoRegExp
 	= createPropNoMap();
     private static final Pattern nameRegExp
-	= Pattern.compile("[0-9A-Za-z_][0-9A-Za-z~._+-]*");
+	= Pattern.compile("[0-9A-Za-z_][0-9A-Za-z~._:+-]*");
 
     private static Map<String, Pattern> createPropNoMap() {
 	Map<String, Pattern> m = new HashMap<String, Pattern>();
