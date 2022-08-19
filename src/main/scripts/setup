@@ -49,12 +49,12 @@ if arg == "INSTALL":
         actions.stopDomain()
         actions.startDomain()
         if app: actions.enableApp(app) 
-    except Exception, e:
+    except Exception as e:
         raise
         abort(str(e))
                 
 if arg == "UNINSTALL":
     try:
         actions.removeFromApplibs("ids.storage_hzb*.jar")        
-    except Exception, e:
+    except Exception as e:
         abort(str(e))       
