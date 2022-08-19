@@ -83,6 +83,11 @@ Bugs and limitations
 Release notes
 ~~~~~~~~~~~~~
 
+Version 0.6.6 (2022-08-19)
+--------------------------
+
++ Fix setup script for Python 3
+
 Version 0.6.5 (2022-06-03)
 --------------------------
 
